@@ -60,6 +60,10 @@ ASP.NET Core 10 generates the OpenAPI document with `Microsoft.AspNetCore.OpenAp
 
 `/api/facets` uses output caching for 10 minutes. `/api/meta` caches the import row and the provider count for 10 minutes, and reads the in-memory chain status on every request. A single output-cached meta response would keep showing an empty chain after the first interpret call.
 
+## 2026-09-27: HttpClient instead of httpResource
+
+`httpResource` in the installed `@angular/common` is still marked `@experimental` (21.0.0). The screens use `HttpClient` and signals, and the search filters live in the URL.
+
 ## 2026-09-27: CI starts at phase 1
 
 The workflow file is added with the skeleton so GitHub checks every push. Phase 1 runs `dotnet build` and the Angular production build. Test jobs are added when those tests exist (phase 7).

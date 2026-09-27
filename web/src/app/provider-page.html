@@ -1,0 +1,41 @@
+<p><a routerLink="/">Back to search</a></p>
+@if (error()) {
+  <p role="alert">{{ error() }}</p>
+}
+@if (detail(); as provider) {
+  <h2 class="provider-name">{{ placeCase(provider.fullName) }}</h2>
+  @if (provider.credentialText) {
+    <p>{{ provider.credentialText }}</p>
+  }
+  <h3>Specialties</h3>
+  <ul>
+    @for (item of provider.taxonomies; track item.code) {
+      <li>
+        {{ item.displayName || item.code }}
+        @if (item.isPrimary) {
+          <span class="muted">Primary</span>
+        }
+        @if (item.licenseNumber) {
+          <span>License {{ item.licenseNumber }}@if (item.licenseState) { ({{ item.licenseState }}) }</span>
+        }
+      </li>
+    }
+  </ul>
+  <h3>Practice</h3>
+  <p>{{ address(provider) }}</p>
+  <div class="row-actions">
+    <button type="button" class="ghost" (click)="copyAddress(provider)">{{ copied() ? 'Copied' : 'Copy address' }}</button>
+    @if (provider.phone) {
+      <a class="button" [href]="'tel:+1' + provider.phone">Call {{ phoneText(provider.phone) }}</a>
+    }
+    <a class="button ghost" [href]="mapsUrl(provider)">Directions</a>
+  </div>
+  <p>NPI <a [href]="provider.registryUrl">{{ provider.npi }}</a></p>
+  @if (provider.registryLastUpdated) {
+    <p>Registry record last updated {{ formatDate(provider.registryLastUpdated) }}.</p>
+  }
+  @if (meta()?.dataAsOf) {
+    <p class="muted">Directory data as of {{ formatDate(meta()!.dataAsOf) }}.</p>
+  }
+  <p>This comes from the federal NPI registry and is self-reported by providers. Confirm details with the provider before booking.</p>
+}
