@@ -6,7 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { catchError, debounceTime, of, Subject, switchMap } from 'rxjs';
 import { GROUPS, PRESETS, groupLabel } from './catalog';
 import { Facets, FinderApi, LocationHit, MapBounds, ProviderDetail, ProviderSummary, UnderstoodItem } from './finder-api';
-import { nextSnap, snapHeights } from './drawer-state';
+import { nextSnap, sheetExpanded, sheetLabel, snapHeights } from './drawer-state';
 import { credentialLabel, distanceText, placeCase, phoneText, streetCase } from './format';
 import { ResultMap } from './map-view';
 import { SearchQuery, isActive, readQuery, toParams } from './query';
@@ -81,6 +81,7 @@ export class SearchPage {
   readonly bounds = signal<MapBounds | null>(null);
   readonly sheetHeight = signal(420);
   readonly drawerClosed = signal(false);
+  readonly filtersOpen = signal(false);
   readonly dragging = signal(false);
   readonly wide = signal(false);
   readonly page = signal(1);
@@ -102,7 +103,7 @@ export class SearchPage {
       clearTimeout(this.nearTimer);
     });
 
-    this.sheetHeight.set(snapHeights(window.innerHeight).half);
+    this.sheetHeight.set(snapHeights(window.innerHeight).peek);
 
     this.requests.pipe(
       debounceTime(260),
@@ -197,6 +198,14 @@ export class SearchPage {
 
   highlight(npi: string) {
     this.selectedNpi.set(npi);
+  }
+
+  labelText(): string {
+    return sheetLabel(this.wide(), this.drawerClosed(), this.loading(), this.total());
+  }
+
+  expanded(): boolean {
+    return sheetExpanded(this.wide(), this.drawerClosed(), this.sheetHeight(), snapHeights(window.innerHeight).peek);
   }
 
   cycleDrawer() {

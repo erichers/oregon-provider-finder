@@ -42,6 +42,7 @@ test('the search page shows a result and the crisis line', async ({ page }) => {
   await page.goto('/?q=grant');
   await expect(page.getByText('In crisis?')).toBeVisible();
   await expect(page.locator('.result-hit', { hasText: 'Neda Lynne Grant' })).toBeVisible();
+  await page.getByRole('button', { name: 'Filters', exact: true }).click();
   await expect(page.getByLabel('Sort')).toHaveValue('relevance');
 });
 
