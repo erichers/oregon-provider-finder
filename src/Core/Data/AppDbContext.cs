@@ -45,6 +45,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.HasIndex(p => new { p.Lat, p.Lng });
             entity.HasIndex(p => p.Zip5);
             entity.HasIndex(p => p.City);
+            entity.HasIndex(p => p.SpecialtyLabels).HasDatabaseName("ix_providers_specialty_trgm").HasMethod("gin").HasOperators("gin_trgm_ops");
 
             entity.HasMany(p => p.Taxonomies)
                 .WithOne(t => t.Provider)

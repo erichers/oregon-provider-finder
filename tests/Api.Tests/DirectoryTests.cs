@@ -119,6 +119,33 @@ public sealed class DirectoryTests(ApiFactory factory) : IClassFixture<ApiFactor
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    [Fact]
+    public async Task A_name_typo_still_finds_the_provider()
+    {
+        var body = await Read("/api/providers?q=NEDA%20LYNNE%20GRNAT");
+        var npis = body.GetProperty("items").EnumerateArray().Select(item => item.GetProperty("npi").GetString()).ToArray();
+        Assert.Contains("1548266448", npis);
+    }
+
+    [Fact]
+    public async Task A_city_typo_matches_the_city()
+    {
+        var body = await Read("/api/providers?q=PORTLND");
+        Assert.True(body.GetProperty("total").GetInt32() > 20000);
+    }
+
+    [Fact]
+    public async Task Pages_do_not_repeat_a_provider()
+    {
+        var first = await Read("/api/providers?groups=counselor&near=Salem&radius=10&sort=distance&page=1");
+        var second = await Read("/api/providers?groups=counselor&near=Salem&radius=10&sort=distance&page=2");
+        var page1 = first.GetProperty("items").EnumerateArray().Select(item => item.GetProperty("npi").GetString()).ToArray();
+        var page2 = second.GetProperty("items").EnumerateArray().Select(item => item.GetProperty("npi").GetString()).ToArray();
+        Assert.Equal(page1.Length, page1.Distinct().Count());
+        Assert.Empty(page1.Intersect(page2));
+        Assert.NotEmpty(page2);
+    }
+
     private async Task<JsonElement> Read(string path)
     {
         var response = await factory.CreateClient().GetAsync(path);

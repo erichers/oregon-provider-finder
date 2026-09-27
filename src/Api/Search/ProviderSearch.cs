@@ -160,8 +160,14 @@ public sealed class ProviderSearch(AppDbContext db)
 
         if (!string.IsNullOrWhiteSpace(criteria.Q))
         {
-            var q = criteria.Q;
-            query = query.Where(p => p.SearchVector.Matches(EF.Functions.WebSearchToTsQuery("english", q)));
+            var q = criteria.Q.Trim();
+            var like = "%" + q + "%";
+            query = query.Where(p =>
+                p.SearchVector.Matches(EF.Functions.WebSearchToTsQuery("english", q))
+                || EF.Functions.TrigramsSimilarity(p.FullName, q) > 0.35
+                || (p.City != null && EF.Functions.TrigramsSimilarity(p.City, q) > 0.4)
+                || EF.Functions.ILike(p.SpecialtyLabels, like)
+                || (p.Zip5 != null && EF.Functions.ILike(p.Zip5, q + "%")));
         }
 
         return (query, center);
@@ -178,9 +184,10 @@ public sealed class ProviderSearch(AppDbContext db)
 
         if (criteria.Sort == "relevance" && !string.IsNullOrWhiteSpace(criteria.Q))
         {
-            var q = criteria.Q;
+            var q = criteria.Q.Trim();
             return query
                 .OrderByDescending(p => p.SearchVector.Rank(EF.Functions.WebSearchToTsQuery("english", q)))
+                .ThenByDescending(p => EF.Functions.TrigramsSimilarity(p.FullName, q))
                 .ThenBy(p => p.Npi);
         }
 

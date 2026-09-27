@@ -29,7 +29,7 @@ export function readQuery(map: ParamMap | null): SearchQuery {
   const near = clean(source.get('near'));
   const radius = clamp(Number(source.get('radius') ?? 25), 1, 100);
   const requested = source.get('sort');
-  let sort: SearchQuery['sort'] = near ? 'distance' : 'name';
+  let sort: SearchQuery['sort'] = near ? 'distance' : clean(source.get('q')) ? 'relevance' : 'name';
   if (requested === 'distance' || requested === 'relevance' || requested === 'name') {
     sort = requested;
   }

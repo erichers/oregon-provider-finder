@@ -127,7 +127,7 @@
           <article class="detail-card">
             <strong>{{ placeCase(person.fullName) }}</strong>
             @if (person.credentialText) {
-              <span>{{ credentialLine(person.credentialText) }}</span>
+              <span>{{ credentialLabel(person.credentialText) }}</span>
             }
             @if (person.primarySpecialty) {
               <span class="result-role">{{ person.primarySpecialty }}</span>
@@ -162,7 +162,7 @@
               <button type="button" class="result-hit" (click)="choose(item.npi)" (pointerenter)="highlight(item.npi)" (focus)="highlight(item.npi)">
                 <strong>{{ placeCase(item.fullName) }}</strong>
                 @if (item.credentialText) {
-                  <span>{{ credentialLine(item.credentialText) }}</span>
+                  <span>{{ credentialLabel(item.credentialText) }}</span>
                 }
                 @if (item.primarySpecialty) {
                   <span class="result-role">{{ item.primarySpecialty }}</span>
@@ -172,7 +172,7 @@
             </article>
           }
           @if (items().length < total()) {
-            <button type="button" (click)="showMore()" [disabled]="loadingMore()">Show more</button>
+            <button type="button" (click)="showMore()" [disabled]="loadingMore()">{{ loadingMore() ? 'Loading' : 'Load more' }}</button>
           }
         }
         <p class="muted">Each marker is a provider at a ZIP center, not a street address.</p>

@@ -7,7 +7,7 @@ import { catchError, debounceTime, of, Subject, switchMap } from 'rxjs';
 import { GROUPS, PRESETS, groupLabel } from './catalog';
 import { Facets, FinderApi, LocationHit, MapBounds, ProviderDetail, ProviderSummary, UnderstoodItem } from './finder-api';
 import { nextSnap, snapHeights } from './drawer-state';
-import { credentialLine, distanceText, placeCase, phoneText, streetCase } from './format';
+import { credentialLabel, distanceText, placeCase, phoneText, streetCase } from './format';
 import { ResultMap } from './map-view';
 import { SearchQuery, isActive, readQuery, toParams } from './query';
 
@@ -89,7 +89,7 @@ export class SearchPage {
   readonly streetCase = streetCase;
   readonly phoneText = phoneText;
   readonly distanceText = distanceText;
-  readonly credentialLine = credentialLine;
+  readonly credentialLabel = credentialLabel;
   readonly groupLabel = groupLabel;
 
   constructor() {
