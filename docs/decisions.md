@@ -24,6 +24,20 @@ Eric created https://github.com/erichers/oregon-provider-finder and asked for wo
 
 System Node is v22.21.1. Angular CLI 22.2.0 requires Node `^22.22.3` or `^24.15.0` or `>=26`. The project keeps Node v22.22.3 under `.tools/node` (gitignored), same pattern as the SDK. Scripts prepend it when the directory exists. CI installs Node 22.22.3 with `actions/setup-node`. nvm is on this Mac, and it was left alone so nothing outside the project directory changes.
 
+## 2026-09-27: NUCC subset is committed
+
+The NUCC permission page allows distribution of the Provider Taxonomy in a US product when the codes stay intact and the copyright notice travels with them. `data/taxonomy/nucc-subset.csv` is a row and column subset of `nucc_taxonomy_261.csv` (downloaded 2026-09-27). Code values are unchanged. `data/taxonomy/NOTICE.md` carries the attribution. This is not a stop-and-ask case: the terms grant distribution, they do not forbid it.
+
+## 2026-09-27: Census ZCTA file is pipe-delimited
+
+The 2026 Gazetteer ZCTA national file uses `|` between fields, not tabs. `data/geo/oregon-zcta.csv` is the 428 rows whose GEOID starts with `97`, with `GEOID`, `INTPTLAT`, and `INTPTLONG`.
+
+## 2026-09-27: Gemini model ids are unprefixed
+
+The Gemini model list returns ids like `models/gemini-flash-latest`. Chat completions on the OpenAI-compatible endpoint accept `gemini-flash-latest` (HTTP 200, `finish_reason` stop, on 2026-09-27). The chain stores the unprefixed id. Groq, NVIDIA, and Cerebras candidates from the brief were all present on their model lists the same day.
+
+The same check sent `chat_template_kwargs` with `thinking` false to `nvidia/nemotron-3.5-lightning-30b-a3b`. NVIDIA returned HTTP 200 and a short `content` value, and also a `reasoning_content` field. The chain reads `content` only.
+
 ## 2026-09-27: Secret scan shapes
 
 `scripts/check-secrets.sh` looks for key-shaped strings (a known prefix plus a tail) rather than the bare prefix. Lockfile hashes contain short fragments such as the OpenAI prefix by coincidence. The script skips `package-lock.json` for the same reason. It also rejects connection-string password assignments and this machine's Frida path.
