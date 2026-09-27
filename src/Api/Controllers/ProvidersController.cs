@@ -20,11 +20,15 @@ public sealed class ProvidersController(ProviderSearch search) : ControllerBase
         [FromQuery] string? sort,
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
+        [FromQuery] double? minLat,
+        [FromQuery] double? minLng,
+        [FromQuery] double? maxLat,
+        [FromQuery] double? maxLng,
         CancellationToken cancellationToken)
     {
         try
         {
-            var criteria = CriteriaParser.Parse(q, groups, specialties, credentials, preset, near, radius, sex, sort, page, pageSize);
+            var criteria = CriteriaParser.Parse(q, groups, specialties, credentials, preset, near, radius, sex, sort, page, pageSize, minLat, minLng, maxLat, maxLng);
             return Ok(await search.SearchAsync(criteria, cancellationToken));
         }
         catch (SearchRejectedException ex)
