@@ -16,7 +16,11 @@ public static class CriteriaParser
         string? sex,
         string? sort,
         int? page,
-        int? pageSize)
+        int? pageSize,
+        double? minLat = null,
+        double? minLng = null,
+        double? maxLat = null,
+        double? maxLng = null)
     {
         if (page is < 1)
         {
@@ -88,6 +92,7 @@ public static class CriteriaParser
         }
 
         var size = Math.Clamp(pageSize ?? 20, 1, 50);
+        var bounds = ReadBounds(minLat, minLng, maxLat, maxLng);
         return new ProviderCriteria(
             string.IsNullOrWhiteSpace(q) ? null : q.Trim(),
             groupKeys,
@@ -99,7 +104,34 @@ public static class CriteriaParser
             sexCode,
             sortKey,
             page ?? 1,
-            size);
+            size,
+            bounds);
+    }
+
+    private static MapBounds? ReadBounds(double? minLat, double? minLng, double? maxLat, double? maxLng)
+    {
+        var edges = new[] { minLat, minLng, maxLat, maxLng };
+        if (edges.All(edge => edge is null))
+        {
+            return null;
+        }
+
+        if (edges.Any(edge => edge is null))
+        {
+            throw new SearchRejectedException("A map area needs all four edges.");
+        }
+
+        if (edges.Any(edge => edge is not { } value || !double.IsFinite(value)))
+        {
+            throw new SearchRejectedException("A map area needs real coordinates.");
+        }
+
+        if (minLat < -90 || maxLat > 90 || minLng < -180 || maxLng > 180 || minLat > maxLat || minLng > maxLng)
+        {
+            throw new SearchRejectedException("That map area is not a valid box.");
+        }
+
+        return new MapBounds(minLat!.Value, minLng!.Value, maxLat!.Value, maxLng!.Value);
     }
 
     private static string[] Split(string? value)

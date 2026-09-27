@@ -116,6 +116,14 @@ public sealed class ProviderSearch(AppDbContext db)
                 && AppDbContext.MilesBetween(place.Lat, place.Lng, p.Lat ?? 0, p.Lng ?? 0) <= radius);
         }
 
+        if (criteria.Bounds is { } box)
+        {
+            query = query.Where(p =>
+                p.Lat != null && p.Lng != null
+                && p.Lat >= box.MinLat && p.Lat <= box.MaxLat
+                && p.Lng >= box.MinLng && p.Lng <= box.MaxLng);
+        }
+
         if (criteria.Preset is not null)
         {
             var groups = criteria.Preset.Groups;
@@ -244,4 +252,7 @@ public sealed record ProviderCriteria(
     string? Sex,
     string Sort,
     int Page,
-    int PageSize);
+    int PageSize,
+    MapBounds? Bounds);
+
+public readonly record struct MapBounds(double MinLat, double MinLng, double MaxLat, double MaxLng);

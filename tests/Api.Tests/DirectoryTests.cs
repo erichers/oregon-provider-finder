@@ -108,6 +108,17 @@ public sealed class DirectoryTests(ApiFactory factory) : IClassFixture<ApiFactor
         Assert.Equal("97301", body.RootElement.GetProperty("filters").GetProperty("near").GetString());
     }
 
+    [Fact]
+    public async Task Bounds_keep_the_search_inside_the_map()
+    {
+        var salem = await Read("/api/providers?minLat=44.8&minLng=-123.2&maxLat=45.1&maxLng=-122.8");
+        Assert.True(salem.GetProperty("total").GetInt32() > 0);
+        var ocean = await Read("/api/providers?minLat=1&minLng=1&maxLat=2&maxLng=2");
+        Assert.Equal(0, ocean.GetProperty("total").GetInt32());
+        var response = await factory.CreateClient().GetAsync("/api/providers?minLat=45");
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     private async Task<JsonElement> Read(string path)
     {
         var response = await factory.CreateClient().GetAsync(path);

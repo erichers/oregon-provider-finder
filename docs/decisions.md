@@ -106,6 +106,12 @@ Ivy reviewed the branch after phase 11. The secret scan used `grep -q` in a pipe
 
 The map plots the providers in the current list, at their ZIP centroid, and groups the ones that land on the same point. Leaflet.markercluster expects a global Leaflet object, which the Angular build does not provide, so the grouping lives next to the map instead of in that plugin. A click on a marker selects that card. Pointing at a card highlights its marker. With nothing to plot, the map stays on a view of Oregon. Tiles are OpenStreetMap, attributed, with a zoom cap of 16. If a tile fails, the markers stay and a line says the tiles did not load. No tile key is required.
 
+## 2026-09-27: The search page is a full-screen map
+
+Eric rejected the split list and map. The search route is now the full window: the map sits behind a left drawer on a wide screen and a bottom sheet on a phone. The sheet stops at a peek, half, and full height, and a drag with enough speed goes to the next stop. The search field and the filter chips float over the map. Panning or zooming asks for providers inside the visible box (`minLat`, `minLng`, `maxLat`, `maxLng`, all four or none). A new search or filter change flies the map to those results once. Moving the map by hand does not fly it back. Scroll, pinch, and double-click zoom stay on. "Your location" uses the browser geolocation API and says so when it is denied.
+
+Leaflet and Leaflet.markercluster load as page scripts so they share one `L`. The earlier import failed because the bundler gave the plugin a different Leaflet than the map. Clusters split with the plugin's own animation, and `prefers-reduced-motion: reduce` turns that animation off. CARTO's public raster URL now returns tiles stamped "API KEY REQUIRED", so the basemap is the OpenStreetMap tile server, attributed, with no key. If a tile fails, the markers remain and a line says the tiles did not load.
+
 ## 2026-09-27: Motion is a short rise
 
 Result cards, the page you navigate to, and the panels on a profile rise 8 pixels and fade in over about 200 to 240 milliseconds. The search box does not animate while someone is typing. `prefers-reduced-motion: reduce` sets those animations to none, so the content is in place immediately.
