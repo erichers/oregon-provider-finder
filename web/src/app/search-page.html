@@ -53,10 +53,21 @@
 
 @if (error()) {
   <p class="note" role="alert">{{ error() }}</p>
-  <button type="button" class="ghost" (click)="retry()">Retry</button>
+  <div class="row-actions">
+    <button type="button" (click)="retry()">Retry</button>
+    <button type="button" class="ghost" (click)="reset()">Start over</button>
+  </div>
 }
 
 @if (active()) {
+  @if (filterChips().length) {
+    <div class="checks" style="margin-top: 1rem" aria-label="Active filters">
+      @for (chip of filterChips(); track chip.id) {
+        <button type="button" class="chip" (click)="go(chip.patch)">Remove {{ chip.label }}</button>
+      }
+      <button type="button" class="ghost" (click)="reset()">Reset</button>
+    </div>
+  }
   <div class="row-actions" style="margin-top: 1rem">
     <p class="muted" aria-live="polite">{{ loading() ? 'Searching' : (total() === 1 ? '1 provider' : total() + ' providers') }}</p>
     <label>
@@ -94,9 +105,9 @@
                 <span>{{ credentialLine(item.credentialText) }}</span>
               }
               @if (item.primarySpecialty) {
-                <span>{{ item.primarySpecialty }}</span>
+                <span class="result-role">{{ item.primarySpecialty }}</span>
               }
-              <span>{{ placeCase(item.city) }}@if (item.distanceMiles !== null) { · {{ distanceText(item.distanceMiles) }} }</span>
+              <span class="result-place">{{ placeCase(item.city) }}@if (item.distanceMiles !== null) { · {{ distanceText(item.distanceMiles) }} }</span>
               @if (item.phone) {
                 <span>{{ phoneText(item.phone) }}</span>
               }

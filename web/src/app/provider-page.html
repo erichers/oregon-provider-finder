@@ -3,10 +3,12 @@
   <p role="alert">{{ error() }}</p>
 }
 @if (detail(); as provider) {
+  <article class="stack">
   <h2 class="provider-name">{{ placeCase(provider.fullName) }}</h2>
   @if (provider.credentialText) {
     <p>{{ credentialLine(provider.credentialText) }}</p>
   }
+  <section class="panel">
   <h3>Specialties</h3>
   <ul>
     @for (item of provider.taxonomies; track item.code) {
@@ -21,6 +23,8 @@
       </li>
     }
   </ul>
+  </section>
+  <section class="panel">
   <h3>Practice</h3>
   <p>{{ address(provider) }}</p>
   <div class="row-actions">
@@ -38,4 +42,6 @@
     <p class="muted">Directory data as of {{ formatDate(meta()!.dataAsOf) }}.</p>
   }
   <p>This comes from the federal NPI registry and is self-reported by providers. Confirm details with the provider before booking.</p>
+  </section>
+  </article>
 }
