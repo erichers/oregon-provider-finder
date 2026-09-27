@@ -17,7 +17,7 @@ public sealed class ProviderSearch(AppDbContext db)
             .Take(criteria.PageSize)
             .Select(p => new Row(
                 p.Npi, p.FullName, p.CredentialText, p.PrimaryTaxonomyCode, p.GroupKeys,
-                p.City, p.Zip5, p.Phone, p.Lat, p.Lng, p.LocationPrecision, p.LastName))
+                p.City, p.Zip5, p.Phone, p.AddressLine1, p.Lat, p.Lng, p.LocationPrecision, p.LastName))
             .ToListAsync(cancellationToken);
         var labels = await LabelsAsync(cancellationToken);
         var items = rows.Select(row => ToSummary(row, labels, center)).ToList();
@@ -201,7 +201,10 @@ public sealed class ProviderSearch(AppDbContext db)
             row.Zip5?.Trim(),
             row.Phone,
             miles,
-            row.LocationPrecision);
+            row.LocationPrecision,
+            row.AddressLine1,
+            row.Lat,
+            row.Lng);
     }
 
     private static double Haversine(double lat1, double lng1, double lat2, double lng2)
@@ -223,6 +226,7 @@ public sealed class ProviderSearch(AppDbContext db)
         string? City,
         string? Zip5,
         string? Phone,
+        string? AddressLine1,
         double? Lat,
         double? Lng,
         string LocationPrecision,

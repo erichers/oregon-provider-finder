@@ -29,9 +29,10 @@
                 "input": "public"
               }
             ],
-            "allowedCommonJsDependencies": ["leaflet"],
+            "allowedCommonJsDependencies": ["leaflet", "leaflet.markercluster"],
             "styles": [
               "node_modules/leaflet/dist/leaflet.css",
+              "node_modules/leaflet.markercluster/dist/MarkerCluster.css",
               "src/styles.scss"
             ]
           },

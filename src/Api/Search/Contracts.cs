@@ -10,7 +10,10 @@ public sealed record ProviderSummary(
     string? Zip5,
     string? Phone,
     double? DistanceMiles,
-    string LocationPrecision);
+    string LocationPrecision,
+    string? AddressLine1,
+    double? Lat,
+    double? Lng);
 
 public sealed record PlaceCenter(double Lat, double Lng, string Label);
 

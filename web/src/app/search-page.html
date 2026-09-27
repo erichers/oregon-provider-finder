@@ -88,7 +88,7 @@
           </div>
         } @else {
           @for (item of items(); track item.npi) {
-            <a class="result" [routerLink]="['/provider', item.npi]">
+            <a class="result" [id]="'result-' + item.npi" [class.selected]="selectedNpi() === item.npi" [routerLink]="['/provider', item.npi]" (pointerenter)="selectedNpi.set(item.npi)" (focus)="selectedNpi.set(item.npi)">
               <strong>{{ placeCase(item.fullName) }}</strong>
               @if (item.credentialText) {
                 <span>{{ credentialLine(item.credentialText) }}</span>
@@ -110,12 +110,12 @@
     }
     @if (wide() || showMap()) {
       <div class="map-column">
-        <app-result-map [points]="points()" />
-        <p class="muted">ZIP centers, not street addresses. Map data from OpenStreetMap.</p>
+        <app-result-map [places]="items()" [selected]="selectedNpi()" [loading]="loading()" (selectPlace)="showOnMap($event)" />
+        <p class="muted">Each marker is a provider at a ZIP center, not a street address. Tiles from OpenStreetMap.</p>
       </div>
     }
   </div>
-  <button type="button" class="map-toggle" (click)="showMap.set(!showMap())">{{ showMap() ? 'List' : 'Map' }}</button>
+  <button type="button" class="map-toggle" [attr.aria-pressed]="showMap()" (click)="showMap.set(!showMap())">{{ showMap() ? 'List' : 'Map' }}</button>
 }
 
 <div class="stack">

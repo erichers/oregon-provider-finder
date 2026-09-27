@@ -13,6 +13,9 @@ export interface ProviderSummary {
   phone: string | null;
   distanceMiles: number | null;
   locationPrecision: string;
+  addressLine1: string | null;
+  lat: number | null;
+  lng: number | null;
 }
 
 export interface SearchResponse {

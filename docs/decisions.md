@@ -101,3 +101,7 @@ The test host sets `ASPNETCORE_ENVIRONMENT` to `Testing` before the app is built
 ## 2026-09-27: Ivy review
 
 Ivy reviewed the branch after phase 11. The secret scan used `grep -q` in a pipe, so a match in a long stream died as SIGPIPE and the script reported a clean file. CI also ran with a closed stdin, so that step scanned nothing. The scan now takes `--stdin`, `--tracked`, or `--history`, and a match is a here-string. Password assignments match only when the value is at least 12 characters, so the CI password and the setup placeholders stay in the repo. Two-letter credentials match only when typed in capitals, so "who do I see" does not become an osteopathic filter. Specialty facet counts are distinct NPIs. The Docker quick start names `PGHOST`, `PGUSER`, and `PGPASSWORD`. A radius the menu does not list is shown as its own option. A count of one reads "1 provider".
+
+## 2026-09-27: Map markers are the providers on the page
+
+The map plots the providers in the current list, at their ZIP centroid, and clusters the ones that land on the same point. A click on a marker selects that card. Pointing at a card highlights its marker. With nothing to plot, the map stays on a view of Oregon. Tiles are OpenStreetMap, attributed, with a zoom cap of 16. If a tile fails, the markers stay and a line says the tiles did not load. No tile key is required.
