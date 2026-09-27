@@ -4,6 +4,9 @@ node_modules/
 .angular/
 dist/
 TestResults/
+test-results/
+playwright-report/
+blob-report/
 coverage/
 data/downloads/
 .env*

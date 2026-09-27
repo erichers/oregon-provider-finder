@@ -24,3 +24,9 @@ cd web && npm ci && npm run build
 Two databases: `oregon_providers` and `oregon_providers_test`. Two login roles: `opf_owner` (owns the schema, runs migrations and imports) and `opf_app` (SELECT on every table, which is the API connection). Passwords live in user-secrets on the Api and Importer projects, under `ConnectionStrings:Owner` and `ConnectionStrings:App`. They are not in the repo.
 
 On this machine the migration `Initial` has been applied to both databases as `opf_owner`. `opf_app` can `SELECT` from `providers` and cannot `INSERT`. `miles_between` is the haversine distance in statute miles.
+
+## Tests
+
+`dotnet test` runs the core tests and the API tests. The API tests use `oregon_providers_test` through `opf_app`. Locally they read `ConnectionStrings:App` from user-secrets and switch the database name. CI sets `OPF_TEST_CONNECTION`. The host environment is `Testing`, so user-secrets model keys are not loaded and interpret stays on the rules interpreter.
+
+`cd web && npm test` runs Vitest. `npm run e2e` runs one Playwright smoke against `ng serve` on port 4300, with the API responses stubbed.

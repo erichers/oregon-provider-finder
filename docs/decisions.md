@@ -66,4 +66,8 @@ ASP.NET Core 10 generates the OpenAPI document with `Microsoft.AspNetCore.OpenAp
 
 ## 2026-09-27: CI starts at phase 1
 
-The workflow file is added with the skeleton so GitHub checks every push. Phase 1 runs `dotnet build` and the Angular production build. Test jobs are added when those tests exist (phase 7).
+The workflow file is added with the skeleton so GitHub checks every push. Phase 1 ran `dotnet build` and the Angular production build. Phase 7 adds the Postgres 18 service, `dotnet test`, Vitest, the Playwright smoke, and `dotnet format --verify-no-changes`.
+
+## 2026-09-27: API tests do not call a model
+
+The test host sets `ASPNETCORE_ENVIRONMENT` to `Testing` before the app is built. That skips Development user-secrets, so the model keys on this machine are not visible to the tests. Interpret then uses the rules interpreter. CI loads `oregon_providers_test` from the committed snapshot and sets `OPF_TEST_CONNECTION`. The workflow password `ci` exists only inside the GitHub Actions Postgres container.

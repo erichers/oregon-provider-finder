@@ -9,8 +9,27 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  api:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_PASSWORD: ci
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      OPF_CI_PASSWORD: ci
+      OPF_TEST_CONNECTION: Host=localhost;Port=5432;Database=oregon_providers_test;Username=opf_app;Password=ci
+      ASPNETCORE_ENVIRONMENT: Testing
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: 1
     steps:
       - uses: actions/checkout@v4
 
@@ -18,19 +37,43 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
+      - name: Check formatting
+        run: dotnet format OregonProviderFinder.slnx --verify-no-changes
+
+      - name: Scan tracked files for secrets
+        run: scripts/check-secrets.sh
+
+      - name: Install the Postgres client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Load the test database
+        run: scripts/prepare-test-db.sh
+
+      - name: Test
+        run: dotnet test OregonProviderFinder.slnx --configuration Release
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22.22.3"
           cache: npm
           cache-dependency-path: web/package-lock.json
 
-      - name: Build the API solution
-        run: dotnet build OregonProviderFinder.slnx --configuration Release
-
-      - name: Install web dependencies
+      - name: Install, test, and build
         working-directory: web
-        run: npm ci
+        run: |
+          npm ci
+          npm test
+          npm run build
 
-      - name: Build the Angular app
+      - name: Install the browser
         working-directory: web
-        run: npm run build
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser smoke
+        working-directory: web
+        run: npm run e2e
