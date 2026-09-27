@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FinderApi, MetaResponse, ProviderDetail } from './finder-api';
-import { credentialLine, formatDate, phoneText, placeCase, streetCase } from './format';
+import { credentialLabel, formatDate, phoneText, placeCase, streetCase } from './format';
 
 @Component({
   selector: 'app-provider-page',
@@ -17,7 +17,7 @@ export class ProviderPage {
   readonly copied = signal(false);
   readonly placeCase = placeCase;
   readonly phoneText = phoneText;
-  readonly credentialLine = credentialLine;
+  readonly credentialLabel = credentialLabel;
   readonly formatDate = formatDate;
 
   constructor() {

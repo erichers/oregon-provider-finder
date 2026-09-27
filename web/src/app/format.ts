@@ -60,6 +60,41 @@ export function credentialLine(value: string | null): string {
     .join(', ');
 }
 
+const credentialMeanings: Record<string, string> = {
+  MD: 'doctor of medicine',
+  DO: 'doctor of osteopathic medicine',
+  NP: 'nurse practitioner',
+  FNP: 'family nurse practitioner',
+  PMHNP: 'psychiatric mental health nurse practitioner',
+  PA: 'physician assistant',
+  'PA-C': 'certified physician assistant',
+  PhD: 'doctor of philosophy',
+  PsyD: 'doctor of psychology',
+  LPC: 'licensed professional counselor',
+  LCSW: 'licensed clinical social worker',
+  LMSW: 'licensed master social worker',
+  MSW: 'master of social work',
+  CSWA: 'clinical social work associate',
+  LMFT: 'licensed marriage and family therapist',
+  MFT: 'marriage and family therapist',
+  CADC: 'certified alcohol and drug counselor',
+  QMHP: 'qualified mental health professional',
+};
+
+export function credentialLabel(value: string | null): string {
+  const line = credentialLine(value);
+  if (!line) {
+    return '';
+  }
+  return line
+    .split(', ')
+    .map((token) => {
+      const meaning = credentialMeanings[token];
+      return meaning ? `${token} (${meaning})` : token;
+    })
+    .join(', ');
+}
+
 export function placeCase(value: string | null): string {
   if (!value) {
     return '';

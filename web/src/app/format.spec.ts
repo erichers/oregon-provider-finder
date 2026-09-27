@@ -1,4 +1,4 @@
-import { credentialLine, distanceText, streetCase } from './format';
+import { credentialLabel, credentialLine, distanceText, streetCase } from './format';
 
 describe('distanceText', () => {
   it('treats a shared ZIP center as under a mile', () => {
@@ -11,5 +11,6 @@ describe('distanceText', () => {
     expect(streetCase('3710 SW US VETERANS HOSPITAL RD')).toBe('3710 SW US Veterans Hospital Rd');
     expect(streetCase('V3-SATP')).toBe('V3-SATP');
     expect(credentialLine('M.D.,PH.D.')).toBe('MD, PhD');
+    expect(credentialLabel('M.D., LCSW')).toBe('MD (doctor of medicine), LCSW (licensed clinical social worker)');
   });
 });

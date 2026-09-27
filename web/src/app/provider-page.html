@@ -6,7 +6,7 @@
   <article class="stack enter">
   <h2 class="provider-name">{{ placeCase(provider.fullName) }}</h2>
   @if (provider.credentialText) {
-    <p>{{ credentialLine(provider.credentialText) }}</p>
+    <p>{{ credentialLabel(provider.credentialText) }}</p>
   }
   <section class="panel">
   <h3>Specialties</h3>
@@ -14,6 +14,9 @@
     @for (item of provider.taxonomies; track item.code) {
       <li>
         {{ item.displayName || item.code }}
+        @if (item.displayName) {
+          <span class="muted"> {{ item.code }}</span>
+        }
         @if (item.isPrimary) {
           <span class="muted"> · Primary</span>
         }
