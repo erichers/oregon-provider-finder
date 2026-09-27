@@ -45,6 +45,16 @@ public sealed class DirectoryTests(ApiFactory factory) : IClassFixture<ApiFactor
     }
 
     [Fact]
+    public async Task Oversized_filters_are_rejected()
+    {
+        var client = factory.CreateClient();
+        var place = await client.GetAsync("/api/providers?near=" + new string('a', 81));
+        var page = await client.GetAsync("/api/providers?page=201");
+        Assert.Equal(HttpStatusCode.BadRequest, place.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, page.StatusCode);
+    }
+
+    [Fact]
     public async Task Unknown_group_is_rejected()
     {
         var response = await factory.CreateClient().GetAsync("/api/providers?groups=not_a_group");

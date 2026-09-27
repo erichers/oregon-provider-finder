@@ -28,6 +28,21 @@ public static class CriteriaParser
             throw new SearchRejectedException("Search text is limited to 200 characters.");
         }
 
+        if (near is { Length: > 80 })
+        {
+            throw new SearchRejectedException("City or ZIP is limited to 80 characters.");
+        }
+
+        if (groups is { Length: > 200 } || specialties is { Length: > 400 } || credentials is { Length: > 200 })
+        {
+            throw new SearchRejectedException("Too many filters.");
+        }
+
+        if (page is > 200)
+        {
+            throw new SearchRejectedException("Page is limited to 200.");
+        }
+
         var groupKeys = Split(groups);
         foreach (var key in groupKeys)
         {
