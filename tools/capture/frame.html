@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <style>
+    html, body { margin: 0; background: #e6e8e3; }
+    .window {
+      width: fit-content;
+      margin: 16px;
+      border: 1px solid #c5cac3;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .bar {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 14px;
+      background: #f4f5f2;
+      border-bottom: 1px solid #d5d9d3;
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    .url {
+      margin-left: 10px;
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      background: #fff;
+      border: 1px solid #d5d9d3;
+      border-radius: 999px;
+      padding: 4px 14px;
+      font: 13px/1.2 "Public Sans", "Helvetica Neue", sans-serif;
+      color: #1f2421;
+    }
+    img { display: block; width: 100%; height: auto; }
+  </style>
+</head>
+<body>
+  <div class="window">
+    <div class="bar">
+      <span class="dot" style="background:#ff5f57"></span>
+      <span class="dot" style="background:#febc2e"></span>
+      <span class="dot" style="background:#28c840"></span>
+      <span class="url" id="url"></span>
+    </div>
+    <img id="shot" alt="">
+  </div>
+</body>
+</html>
