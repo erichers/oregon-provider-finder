@@ -38,6 +38,12 @@ The Gemini model list returns ids like `models/gemini-flash-latest`. Chat comple
 
 The same check sent `chat_template_kwargs` with `thinking` false to `nvidia/nemotron-3.5-lightning-30b-a3b`. NVIDIA returned HTTP 200 and a short `content` value, and also a `reasoning_content` field. The chain reads `content` only.
 
+## 2026-09-27: Snake case columns, no unaccent in the search vector
+
+EF Core maps property names to snake_case (`full_name`, `group_keys`) through EFCore.NamingConventions. The generated `search_vector` uses `to_tsvector('english', ...)` over name, city, and specialty labels. The stock `unaccent` function is not immutable, so it is not in that expression and the extension is not created.
+
+`miles_between(lat1, lng1, lat2, lng2)` is a SQL haversine in statute miles, created by the Initial migration.
+
 ## 2026-09-27: Secret scan shapes
 
 `scripts/check-secrets.sh` looks for key-shaped strings (a known prefix plus a tail) rather than the bare prefix. Lockfile hashes contain short fragments such as the OpenAI prefix by coincidence. The script skips `package-lock.json` for the same reason. It also rejects connection-string password assignments and this machine's Frida path.
