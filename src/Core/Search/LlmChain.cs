@@ -138,6 +138,10 @@ public static class LlmChain
         {
             return (new LlmAttempt(provider.Name, model, "json", 0, watch.ElapsedMilliseconds), null);
         }
+        catch (InvalidOperationException)
+        {
+            return (new LlmAttempt(provider.Name, model, "json", 0, watch.ElapsedMilliseconds), null);
+        }
     }
 
     private static string Body(LlmProviderOptions provider, string model, string text, int maxTokens)

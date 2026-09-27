@@ -59,10 +59,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
-else
-{
-    app.UseExceptionHandler();
-}
+
+app.UseExceptionHandler();
 
 app.UseRateLimiter();
 app.UseOutputCache();

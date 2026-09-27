@@ -64,6 +64,10 @@ ASP.NET Core 10 generates the OpenAPI document with `Microsoft.AspNetCore.OpenAp
 
 `httpResource` in the installed `@angular/common` is still marked `@experimental` (21.0.0). The screens use `HttpClient` and signals, and the search filters live in the URL.
 
+## 2026-09-27: Filter length limits
+
+The security pass found that a city or ZIP and the page number were not bounded, while search text, page size, and radius already were. A place is now limited to 80 characters, a page to 200, and the comma-separated filter lists to a few hundred characters. The sentences returned for a bad request are written in this API.
+
 ## 2026-09-27: Setup loads the taxonomy table
 
 The committed snapshot has providers, taxonomy links, and enough metadata to rebuild cities. It does not include the NUCC rows or the ZIP centroids. `setup.sh` runs `import geo`, `import taxonomy`, and `import snapshot` into both databases. A fresh checkout can search without the 1 GB NPPES zip.
