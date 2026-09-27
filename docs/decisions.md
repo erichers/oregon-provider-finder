@@ -131,3 +131,7 @@ The other-organization-name file and the endpoint file stay in the zip and are n
 ## 2026-09-27: The map bar floats
 
 The search page header and the 988 line share one slim bar over the map, and the crisis links stay in that bar. The search field is a pill. Care needs are one scrolling row of chips. Sort and the rest of the filters open from a Filters button. On a phone the list starts as a short peek that names the count, so the map stays in view. The framed screenshots were wider than the 390px capture because the window chrome stretched past the image. The frame is now the same width as the shot.
+
+## 2026-09-27: The list opens from a chevron
+
+The gray handle pill is gone. A 44px button at the top of the list holds a chevron. On a wide screen it points left to close and right to open, and a closed drawer shrinks to that button. On a phone it points down to close and up to open, and the closed sheet is a 64px bar with the count. Dragging the bar still changes the sheet height. The arrow does not rotate when reduced motion is on. Active filters, Reset, and Filters share one scrolling row so they do not stack over the map.

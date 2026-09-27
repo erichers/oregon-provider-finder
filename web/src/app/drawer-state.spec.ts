@@ -1,10 +1,10 @@
-import { nextSnap, sheetExpanded, sheetLabel, snapHeights } from './drawer-state';
+import { chevronDir, nextSnap, sheetExpanded, sheetLabel, snapHeights, toggleLabel } from './drawer-state';
 
 describe('drawer snaps', () => {
   const snaps = snapHeights(844);
 
   it('offers peek, half, and full', () => {
-    expect(snaps.peek).toBe(112);
+    expect(snaps.peek).toBe(64);
     expect(snaps.half).toBe(388);
     expect(snaps.full).toBe(712);
   });
@@ -17,11 +17,16 @@ describe('drawer snaps', () => {
   });
 
   it('names the peek and whether the list is open', () => {
-    expect(sheetLabel(false, false, false, 12)).toBe('12 providers');
-    expect(sheetLabel(false, false, false, 1)).toBe('1 provider');
-    expect(sheetLabel(true, true, false, 12)).toBe('Show providers');
-    expect(sheetExpanded(true, false, 112, 112)).toBe(true);
-    expect(sheetExpanded(false, false, 112, 112)).toBe(false);
-    expect(sheetExpanded(false, false, 388, 112)).toBe(true);
+    expect(sheetLabel(false, 12)).toBe('12 providers');
+    expect(sheetLabel(false, 1)).toBe('1 provider');
+    expect(toggleLabel(true)).toBe('Hide provider list');
+    expect(toggleLabel(false)).toBe('Show provider list');
+    expect(chevronDir(true, true)).toBe('left');
+    expect(chevronDir(true, false)).toBe('right');
+    expect(chevronDir(false, true)).toBe('down');
+    expect(chevronDir(false, false)).toBe('up');
+    expect(sheetExpanded(true, false, 64, 64)).toBe(true);
+    expect(sheetExpanded(false, false, 64, 64)).toBe(false);
+    expect(sheetExpanded(false, false, 388, 64)).toBe(true);
   });
 });

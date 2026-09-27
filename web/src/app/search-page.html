@@ -25,14 +25,15 @@
         }
       </div>
 
-      @if (filterChips().length) {
-        <div class="checks" aria-label="Active filters">
-          @for (chip of filterChips(); track chip.id) {
-            <button type="button" class="chip" (click)="go(chip.patch)">Remove {{ chip.label }}</button>
-          }
+      <div class="filter-strip">
+        @for (chip of filterChips(); track chip.id) {
+          <button type="button" class="chip" (click)="go(chip.patch)">Remove {{ chip.label }}</button>
+        }
+        @if (filterChips().length) {
           <button type="button" class="ghost" (click)="reset()">Reset</button>
-        </div>
-      }
+        }
+        <button type="button" class="ghost filter-toggle" [attr.aria-expanded]="filtersOpen()" aria-controls="filter-panel" (click)="filtersOpen.update((open) => !open)">Filters</button>
+      </div>
       @for (note of unsupported(); track note) {
         <p class="note">{{ note }}</p>
       }
@@ -44,7 +45,6 @@
         </div>
       }
 
-      <button type="button" class="ghost filter-toggle" [attr.aria-expanded]="filtersOpen()" aria-controls="filter-panel" (click)="filtersOpen.update((open) => !open)">Filters</button>
       <div id="filter-panel" class="filter-panel" [hidden]="!filtersOpen()">
         <label for="sort">Sort
           <select id="sort" [value]="filters().sort" (change)="go({ sort: $any($event.target).value })">
@@ -115,11 +115,15 @@
     </div>
 
     <div class="drawer-sheet">
-      <button type="button" class="drawer-handle" [attr.aria-expanded]="expanded()" aria-controls="results" aria-live="polite" (click)="cycleDrawer()" (keydown)="onHandleKey($event)" (pointerdown)="dragStart($event)" (pointermove)="dragMove($event)" (pointerup)="dragEnd()" (pointercancel)="dragEnd()">
-        <span class="handle-bar" aria-hidden="true"></span>
-        {{ labelText() }}
-      </button>
-      <div class="drawer-scroll" id="results">
+      <div class="drawer-head" [class.scrolled]="listScrolled()" (pointerdown)="dragStart($event)" (pointermove)="dragMove($event)" (pointerup)="dragEnd()" (pointercancel)="dragEnd()">
+        <p class="drawer-count" aria-live="polite">{{ labelText() }}</p>
+        <button type="button" class="drawer-toggle" [attr.aria-expanded]="expanded()" [attr.aria-label]="toggleText()" aria-controls="results" (click)="cycleDrawer()" (keydown)="onHandleKey($event)">
+          <svg class="chevron" [attr.data-dir]="arrowDir()" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M9 6.5 15 12 9 17.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+      <div class="drawer-scroll" id="results" (scroll)="onListScroll($event)">
         @if (picked(); as person) {
           <article class="detail-card">
             <strong>{{ placeCase(person.fullName) }}</strong>
@@ -159,7 +163,7 @@
               <button type="button" class="result-hit" (click)="choose(item.npi)" (pointerenter)="highlight(item.npi)" (focus)="highlight(item.npi)">
                 <strong>{{ placeCase(item.fullName) }}</strong>
                 @if (item.credentialText) {
-                  <span>{{ credentialLabel(item.credentialText) }}</span>
+                  <span class="result-credential">{{ credentialLabel(item.credentialText) }}</span>
                 }
                 @if (item.primarySpecialty) {
                   <span class="result-role">{{ item.primarySpecialty }}</span>
