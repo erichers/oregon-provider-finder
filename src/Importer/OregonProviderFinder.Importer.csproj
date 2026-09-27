@@ -11,4 +11,10 @@
     <ProjectReference Include="..\Core\OregonProviderFinder.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="CsvHelper" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
+  </ItemGroup>
+
 </Project>
