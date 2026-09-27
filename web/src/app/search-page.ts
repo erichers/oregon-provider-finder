@@ -28,7 +28,6 @@ export class SearchPage {
   readonly filters = computed(() => readQuery(this.queryMap()));
   readonly items = signal<ProviderSummary[]>([]);
   readonly total = signal(0);
-  readonly points = signal<{ zip5: string; lat: number; lng: number; count: number }[]>([]);
   readonly facets = signal<Facets | null>(null);
   readonly loading = signal(false);
   readonly loadingMore = signal(false);
@@ -40,6 +39,7 @@ export class SearchPage {
   readonly suggestions = signal<LocationHit[]>([]);
   readonly nearDraft = signal('');
   readonly showMap = signal(false);
+  readonly selectedNpi = signal<string | null>(null);
   readonly wide = signal(false);
   readonly page = signal(1);
   readonly active = computed(() => isActive(this.filters()));
@@ -69,13 +69,11 @@ export class SearchPage {
             this.loading.set(false);
             this.items.set([]);
             this.total.set(0);
-            this.points.set([]);
             return of(null);
           }
           this.loading.set(true);
           return forkJoin({
             search: this.api.search(query, 1),
-            map: this.api.map(query).pipe(catchError(() => of([]))),
             facets: this.api.facets(query.groups).pipe(catchError(() => of(null))),
           }).pipe(catchError((err: HttpErrorResponse) => {
             this.error.set(message(err));
@@ -91,7 +89,6 @@ export class SearchPage {
         }
         this.items.set(result.search.items);
         this.total.set(result.search.total);
-        this.points.set(result.map);
         if (result.facets) {
           this.facets.set(result.facets);
         }
@@ -103,6 +100,14 @@ export class SearchPage {
         this.facets.set(facets);
       }
     });
+  }
+
+  showOnMap(npi: string) {
+    this.selectedNpi.set(npi);
+    if (!this.wide()) {
+      this.showMap.set(false);
+    }
+    queueMicrotask(() => document.getElementById('result-' + npi)?.scrollIntoView({ block: 'nearest' }));
   }
 
   emptyLine(): string {
