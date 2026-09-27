@@ -48,6 +48,10 @@ EF Core maps property names to snake_case (`full_name`, `group_keys`) through EF
 
 `scripts/check-secrets.sh` looks for key-shaped strings (a known prefix plus a tail) rather than the bare prefix. Lockfile hashes contain short fragments such as the OpenAI prefix by coincidence. The script skips `package-lock.json` for the same reason. It also rejects connection-string password assignments and this machine's Frida path.
 
+## 2026-09-27: EF Core pinned to 10.0.4
+
+`Npgsql.EntityFrameworkCore.PostgreSQL` 10.0.3 depends on EF Core 10.0.4. The Design package had resolved to 10.0.12, and the build warned that 10.0.4 won the conflict. Design, EF Core, and the relational package are pinned to 10.0.4 so the importer and the design-time factory load one version.
+
 ## 2026-09-27: CI starts at phase 1
 
 The workflow file is added with the skeleton so GitHub checks every push. Phase 1 runs `dotnet build` and the Angular production build. Test jobs are added when those tests exist (phase 7).

@@ -15,6 +15,8 @@ cd web && npm ci && npm run build
 
 `scripts/setup.sh` and `scripts/dev.sh` arrive in a later phase. They will create the database roles, apply migrations, and load the snapshot.
 
+`data/snapshot` is the committed Oregon extract (about 4.5 MB). `dotnet run --project src/Importer -- import snapshot` reloads providers, taxonomy links, and cities. `import geo` and `import taxonomy` load the ZIP centroids and the NUCC subset. Counts from the 2026-09-27 full import are in `docs/data-pipeline.md`.
+
 ## Database roles
 
 Two databases: `oregon_providers` and `oregon_providers_test`. Two login roles: `opf_owner` (owns the schema, runs migrations and imports) and `opf_app` (SELECT on every table, which is the API connection). Passwords live in user-secrets on the Api and Importer projects, under `ConnectionStrings:Owner` and `ConnectionStrings:App`. They are not in the repo.
