@@ -400,3 +400,45 @@ details.panel summary {
 .map-popup p {
   margin: 0 0 0.25rem;
 }
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .enter {
+    animation: rise 220ms ease;
+  }
+
+  #results .result {
+    animation: rise 200ms ease backwards;
+  }
+
+  #results .result:nth-child(2) { animation-delay: 30ms; }
+  #results .result:nth-child(3) { animation-delay: 60ms; }
+  #results .result:nth-child(4) { animation-delay: 90ms; }
+  #results .result:nth-child(5) { animation-delay: 120ms; }
+  #results .result:nth-child(6) { animation-delay: 150ms; }
+  #results .result:nth-child(7) { animation-delay: 180ms; }
+  #results .result:nth-child(8) { animation-delay: 210ms; }
+  #results .result:nth-child(n + 9) { animation-delay: 240ms; }
+
+  .enter .panel {
+    animation: rise 240ms ease backwards;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter,
+  #results .result,
+  .enter .panel {
+    animation: none;
+  }
+}

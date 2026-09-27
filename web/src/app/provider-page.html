@@ -3,7 +3,7 @@
   <p role="alert">{{ error() }}</p>
 }
 @if (detail(); as provider) {
-  <article class="stack">
+  <article class="stack enter">
   <h2 class="provider-name">{{ placeCase(provider.fullName) }}</h2>
   @if (provider.credentialText) {
     <p>{{ credentialLine(provider.credentialText) }}</p>
