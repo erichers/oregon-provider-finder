@@ -140,7 +140,7 @@
                 <span>{{ item.credentialText }}</span>
               }
               <span>{{ item.primarySpecialty }}</span>
-              <span>{{ placeCase(item.city) }}@if (item.distanceMiles !== null) { · {{ item.distanceMiles }} mi }</span>
+              <span>{{ placeCase(item.city) }}@if (item.distanceMiles !== null) { · {{ distanceText(item.distanceMiles) }} }</span>
               @if (item.phone) {
                 <span>{{ phoneText(item.phone) }}</span>
               }

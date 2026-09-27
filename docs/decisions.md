@@ -64,6 +64,16 @@ ASP.NET Core 10 generates the OpenAPI document with `Microsoft.AspNetCore.OpenAp
 
 `httpResource` in the installed `@angular/common` is still marked `@experimental` (21.0.0). The screens use `HttpClient` and signals, and the search filters live in the URL.
 
+## 2026-09-27: Review
+
+The review pass looked at the API, the screens at 390 and 1440, the README, and the setup script.
+
+A distance of 0 miles is real: the practice ZIP center is the same point as the city center, which is what the haversine returns. The list was showing "0 mi", which reads as the same building. It now says "under 1 mi" when the distance is below 1. Rounded miles stay as they were for longer distances.
+
+The phone results frame was wider than the page because the URL pill stretched the window. The pill now ellipsizes. The exception page in Development was already replaced with the shared handler in the security pass, after a null model radius threw and the stack reached the client.
+
+No other defect in that pass needed a code change. The assigned reviewers were Ivy and Nora. This session did the pass in the main thread and recorded it here.
+
 ## 2026-09-27: Filter length limits
 
 The security pass found that a city or ZIP and the page number were not bounded, while search text, page size, and radius already were. A place is now limited to 80 characters, a page to 200, and the comma-separated filter lists to a few hundred characters. The sentences returned for a bad request are written in this API.
