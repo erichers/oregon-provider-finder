@@ -14,7 +14,7 @@ if [[ "$node_ok" != "yes" ]]; then
 fi
 
 if ! psql -d postgres -tA -c "SELECT 1" >/dev/null; then
-  echo "Postgres is not accepting connections. Start it, or set PGHOST and PGUSER."
+  echo "Postgres is not accepting connections. Start it, or set PGHOST, PGUSER, and PGPASSWORD."
   exit 1
 fi
 

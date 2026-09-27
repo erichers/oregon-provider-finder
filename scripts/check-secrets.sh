@@ -18,8 +18,8 @@ shapes=(
   "csk""-"'[A-Za-z0-9]{8,}'
   "AI""za"'[A-Za-z0-9_-]{8,}'
   "sk""-"'[A-Za-z0-9]{16,}'
-  "Pass""word=""[^[:space:]]+"
-  "Pw""d=""[^[:space:]]+"
+  "Pass""word=""[A-Za-z0-9+/_-]{12,}"
+  "Pw""d=""[A-Za-z0-9+/_-]{12,}"
 )
 frida_home="${HOME}/Sites/""frida"
 frida_abs="/Users/""eric/Sites/""frida"
@@ -29,14 +29,16 @@ scan_text() {
   local text="$2"
   local n
   for n in "${shapes[@]}"; do
-    if printf '%s' "$text" | grep -I -E -q -- "$n"; then
+    # A here-string, not a pipe. grep -q closes stdin at the first hit, and
+    # pipefail would turn that SIGPIPE into a false "no match" on a large file.
+    if grep -I -E -q -- "$n" <<<"$text"; then
       report "forbidden pattern in $label"
     fi
   done
-  if printf '%s' "$text" | grep -I -F -q -- "$frida_home"; then
+  if grep -I -F -q -- "$frida_home" <<<"$text"; then
     report "local frida path in $label"
   fi
-  if printf '%s' "$text" | grep -I -F -q -- "$frida_abs"; then
+  if grep -I -F -q -- "$frida_abs" <<<"$text"; then
     report "local frida path in $label"
   fi
 }
@@ -50,26 +52,41 @@ scan_file() {
   scan_text "$f" "$(cat "$f")"
 }
 
-if [ ! -t 0 ]; then
-  scan_text "stdin" "$(cat)"
-else
-  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    report "not a git repository"
-  elif [ "${1:-}" = "--history" ]; then
+scan_tracked() {
+  while IFS= read -r f; do
+    scan_file "$f"
+  done < <(git ls-files)
+}
+
+mode="${1:-}"
+case "$mode" in
+  --stdin)
+    scan_text "stdin" "$(cat)"
+    ;;
+  --history)
     scan_text "git history" "$(git log -p -- . ':(exclude)package-lock.json' ':(exclude)web/package-lock.json')"
-  else
-    staged="$(git diff --cached --name-only --diff-filter=ACMR || true)"
-    if [ -n "$staged" ]; then
-      while IFS= read -r f; do
-        scan_file "$f"
-      done <<< "$staged"
+    ;;
+  --tracked)
+    scan_tracked
+    ;;
+  "")
+    if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      report "not a git repository"
     else
-      while IFS= read -r f; do
-        scan_file "$f"
-      done < <(git ls-files)
+      staged="$(git diff --cached --name-only --diff-filter=ACMR || true)"
+      if [ -n "$staged" ]; then
+        while IFS= read -r f; do
+          scan_file "$f"
+        done <<< "$staged"
+      else
+        scan_tracked
+      fi
     fi
-  fi
-fi
+    ;;
+  *)
+    report "unknown mode $mode"
+    ;;
+esac
 
 if [ "$fail" -ne 0 ]; then
   exit 1

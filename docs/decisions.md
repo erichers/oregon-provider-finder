@@ -97,3 +97,7 @@ The workflow file is added with the skeleton so GitHub checks every push. Phase 
 ## 2026-09-27: API tests do not call a model
 
 The test host sets `ASPNETCORE_ENVIRONMENT` to `Testing` before the app is built. That skips Development user-secrets, so the model keys on this machine are not visible to the tests. Interpret then uses the rules interpreter. CI loads `oregon_providers_test` from the committed snapshot and sets `OPF_TEST_CONNECTION`. The workflow password `ci` exists only inside the GitHub Actions Postgres container.
+
+## 2026-09-27: Ivy review
+
+Ivy reviewed the branch after phase 11. The secret scan used `grep -q` in a pipe, so a match in a long stream died as SIGPIPE and the script reported a clean file. CI also ran with a closed stdin, so that step scanned nothing. The scan now takes `--stdin`, `--tracked`, or `--history`, and a match is a here-string. Password assignments match only when the value is at least 12 characters, so the CI password and the setup placeholders stay in the repo. Two-letter credentials match only when typed in capitals, so "who do I see" does not become an osteopathic filter. Specialty facet counts are distinct NPIs. The Docker quick start names `PGHOST`, `PGUSER`, and `PGPASSWORD`. A radius the menu does not list is shown as its own option. A count of one reads "1 provider".

@@ -38,4 +38,20 @@ public class RulesInterpreterTests
         Assert.Contains("insurance", draft.Unsupported);
         Assert.False(LlmDraftParser.TryParse("not json", out _));
     }
+
+    [Fact]
+    public void The_word_do_is_not_the_credential_DO()
+    {
+        var draft = RulesInterpreter.Read("who do I see for anxiety in Salem");
+
+        Assert.DoesNotContain("DO", draft.Credentials);
+        Assert.Equal("Salem", draft.Place);
+    }
+
+    [Fact]
+    public void A_capital_DO_and_a_lowercase_lpc_still_match()
+    {
+        Assert.Contains("DO", RulesInterpreter.Read("a DO in Portland").Credentials);
+        Assert.Contains("LPC", RulesInterpreter.Read("an lpc in Bend").Credentials);
+    }
 }
