@@ -55,43 +55,50 @@ async function framed(page, name, urlLabel, displayWidth) {
 
 if (process.env.SKIP_SHOTS !== "1") {
 const desktop = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-await desktop.goto(base + "/", { waitUntil: "networkidle" });
+await desktop.goto(base + "/", { waitUntil: "domcontentloaded" });
+await desktop.waitForSelector(".map-frame.leaflet-container");
+await desktop.waitForTimeout(1500);
 await framed(desktop, "search-desktop", "localhost:4200/", 1440);
 
 const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
-await phone.goto(base + "/", { waitUntil: "networkidle" });
+await phone.goto(base + "/", { waitUntil: "domcontentloaded" });
+await phone.waitForSelector(".map-frame.leaflet-container");
+await phone.waitForTimeout(1500);
 await framed(phone, "search-phone", "localhost:4200/", 390);
 
 const resultsUrl = "/?groups=physician&near=Portland&radius=25";
-await desktop.goto(base + resultsUrl, { waitUntil: "networkidle" });
+await desktop.goto(base + resultsUrl, { waitUntil: "domcontentloaded" });
 await desktop.waitForSelector(".result");
 await desktop.waitForSelector(".map-frame.leaflet-container");
 await desktop.locator("#results").evaluate((node) => node.scrollIntoView({ block: "start" }));
-await desktop.waitForTimeout(1200);
+await desktop.waitForTimeout(2200);
 await framed(desktop, "results-desktop", "localhost:4200/?groups=physician&near=Portland&radius=25", 1440);
+await framed(desktop, "map-desktop", "localhost:4200/?groups=physician&near=Portland&radius=25", 1440);
 
-await phone.goto(base + resultsUrl, { waitUntil: "networkidle" });
+await phone.goto(base + resultsUrl, { waitUntil: "domcontentloaded" });
 await phone.waitForSelector(".result");
-await phone.waitForSelector(".map-toggle");
+await phone.waitForSelector(".map-frame.leaflet-container");
+await phone.waitForSelector(".drawer-sheet");
 await phone.locator("#results").evaluate((node) => node.scrollIntoView({ block: "start" }));
-await phone.waitForTimeout(400);
+await phone.waitForTimeout(800);
 await framed(phone, "results-phone", "localhost:4200/?groups=physician&near=Portland&radius=25", 390);
+await framed(phone, "map-phone", "localhost:4200/?groups=physician&near=Portland&radius=25", 390);
 
-await desktop.goto(base + "/", { waitUntil: "networkidle" });
+await desktop.goto(base + "/", { waitUntil: "domcontentloaded" });
 await desktop.locator("#words").fill("nurse practitioner in Salem within 10 miles");
 await desktop.getByRole("button", { name: "Search" }).click();
 await desktop.waitForSelector("text=Remove");
 await framed(desktop, "plain-words", "localhost:4200" + new URL(desktop.url()).search, 1440);
 
-await desktop.goto(base + detail, { waitUntil: "networkidle" });
+await desktop.goto(base + detail, { waitUntil: "domcontentloaded" });
 await desktop.waitForSelector(".provider-name");
 await framed(desktop, "detail-desktop", "localhost:4200" + detail, 1440);
 
-await phone.goto(base + detail, { waitUntil: "networkidle" });
+await phone.goto(base + detail, { waitUntil: "domcontentloaded" });
 await phone.waitForSelector(".provider-name");
 await framed(phone, "detail-phone", "localhost:4200" + detail, 390);
 
-await phone.goto(base + "/about-data", { waitUntil: "networkidle" });
+await phone.goto(base + "/about-data", { waitUntil: "domcontentloaded" });
 await phone.waitForSelector("h2");
 await framed(phone, "about-phone", "localhost:4200/about-data", 390);
 
@@ -109,7 +116,7 @@ const videoContext = await browser.newContext({
   recordVideo: { dir: raw, size: { width: 1280, height: 800 } },
 });
 const page = await videoContext.newPage();
-await page.goto(base + "/", { waitUntil: "networkidle" });
+await page.goto(base + "/", { waitUntil: "domcontentloaded" });
 await page.waitForTimeout(1500);
 await page.locator("#words").pressSequentially("a psychiatric nurse practitioner near Bend", { delay: 80 });
 await page.waitForTimeout(800);
@@ -129,7 +136,8 @@ await page.locator("#results").evaluate((node) => node.scrollIntoView());
 await page.waitForTimeout(2000);
 await page.mouse.wheel(0, 400);
 await page.waitForTimeout(2000);
-await page.locator(".result").first().click();
+await page.locator(".result-hit").first().click();
+await page.getByRole("link", { name: "Full profile" }).click();
 await page.waitForSelector(".provider-name");
 await page.waitForTimeout(3000);
 await page.goBack();

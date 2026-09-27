@@ -84,7 +84,7 @@ test('search, results, and a profile have no serious accessibility violations', 
   expect(await serious(page)).toEqual([]);
 
   await page.goto('/?q=grant');
-  await expect(page.getByRole('link', { name: /Grant/ })).toBeVisible();
+  await expect(page.locator('.result-hit', { hasText: 'Grant' })).toBeVisible();
   expect(await serious(page)).toEqual([]);
 
   await page.goto('/provider/1548266448');

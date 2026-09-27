@@ -44,6 +44,8 @@ test('reduced motion keeps result cards still', async ({ page }) => {
   await results(page);
   const name = await page.locator('.result').first().evaluate((el) => getComputedStyle(el).animationName);
   expect(name).toBe('none');
+  const sheet = await page.locator('.drawer-sheet').evaluate((el) => getComputedStyle(el).transitionProperty);
+  expect(sheet).toBe('none');
 });
 
 test('result cards rise when motion is allowed', async ({ page }) => {

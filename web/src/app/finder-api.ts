@@ -26,6 +26,13 @@ export interface SearchResponse {
   items: ProviderSummary[];
 }
 
+export interface MapBounds {
+  minLat: number;
+  minLng: number;
+  maxLat: number;
+  maxLng: number;
+}
+
 export interface MapPoint {
   zip5: string;
   lat: number;
@@ -108,8 +115,8 @@ export interface MetaResponse {
 export class FinderApi {
   private readonly http = inject(HttpClient);
 
-  search(query: SearchQuery, page: number) {
-    return this.http.get<SearchResponse>('/api/providers', { params: this.params(query, page) });
+  search(query: SearchQuery, page: number, bounds?: MapBounds | null) {
+    return this.http.get<SearchResponse>('/api/providers', { params: this.params(query, page, bounds) });
   }
 
   map(query: SearchQuery) {
@@ -140,8 +147,15 @@ export class FinderApi {
     return this.http.get<MetaResponse>('/api/meta');
   }
 
-  private params(query: SearchQuery, page: number): HttpParams {
-    let params = new HttpParams().set('page', page).set('pageSize', 20).set('sort', query.sort);
+  private params(query: SearchQuery, page: number, bounds?: MapBounds | null): HttpParams {
+    let params = new HttpParams().set('page', page).set('pageSize', 40).set('sort', query.sort);
+    if (bounds) {
+      params = params
+        .set('minLat', bounds.minLat)
+        .set('minLng', bounds.minLng)
+        .set('maxLat', bounds.maxLat)
+        .set('maxLng', bounds.maxLng);
+    }
     if (query.q) params = params.set('q', query.q);
     if (query.groups.length) params = params.set('groups', query.groups.join(','));
     if (query.specialties.length) params = params.set('specialties', query.specialties.join(','));

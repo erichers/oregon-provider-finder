@@ -1,95 +1,153 @@
-<div class="enter">
-<form class="stack" (submit)="submitWords($event)">
-  <div>
-    <label for="words">Describe who you're looking for</label>
-    <input id="words" type="search" [value]="words()" (input)="words.set($any($event.target).value)" placeholder="Nurse practitioner in Salem" />
-  </div>
-  <button type="submit" [disabled]="interpreting()">{{ interpreting() ? 'Searching' : 'Search' }}</button>
-</form>
+<div class="map-root">
+  <app-result-map
+    [places]="items()"
+    [selected]="selectedNpi()"
+    [loading]="loading()"
+    [fitToken]="fitToken()"
+    [reveal]="reveal()"
+    [wide]="wide()"
+    (selectPlace)="choose($event)"
+    (boundsChange)="onBounds($event)" />
 
-<div class="stack">
-  <p class="field-label" id="care-needs">Care needs</p>
-  <div class="checks" role="group" aria-labelledby="care-needs">
-    @for (preset of presets; track preset.key) {
-      <button type="button" class="chip" [attr.aria-pressed]="filters().preset === preset.key" (click)="pickPreset(preset.key)">{{ preset.label }}</button>
-    }
-  </div>
-</div>
+  <aside class="drawer" [class.closed]="drawerClosed()" [class.dragging]="dragging()" [style.--sheet.px]="sheetHeight()">
+    <div class="float-search">
+      <form class="search-bar" (submit)="submitWords($event)">
+        <label class="sr" for="words">Describe who you're looking for</label>
+        <input id="words" type="search" [value]="words()" (input)="words.set($any($event.target).value)" placeholder="Nurse practitioner in Salem" />
+        <button type="submit" [disabled]="interpreting()">{{ interpreting() ? 'Searching' : 'Search' }}</button>
+      </form>
 
-@if (understood().length) {
-  <div class="checks" style="margin-top: 0.75rem">
-    @for (chip of understood(); track chip.kind + chip.label) {
-      <button type="button" class="chip" (click)="removeChip(chip)">Remove {{ chip.label }}</button>
-    }
-  </div>
-}
-@for (note of unsupported(); track note) {
-  <p class="note">{{ note }}</p>
-}
-
-<div class="stack">
-  <div class="panel">
-    <label for="near">City or ZIP</label>
-    <input id="near" type="text" [value]="nearDraft()" (input)="onNear($any($event.target).value)" (keydown.enter)="applyNear(); $event.preventDefault()" autocomplete="off" />
-    @if (suggestions().length) {
-      <ul class="suggest">
-        @for (hit of suggestions(); track hit.value) {
-          <li><button type="button" (click)="pickPlace(hit)">{{ placeCase(hit.label) }}</button></li>
+      <div class="checks care-row" role="group" aria-labelledby="care-needs">
+        <p class="sr" id="care-needs">Care needs</p>
+        @for (preset of presets; track preset.key) {
+          <button type="button" class="chip" [attr.aria-pressed]="filters().preset === preset.key" (click)="pickPreset(preset.key)">{{ preset.label }}</button>
         }
-      </ul>
-    }
-    <label for="radius">Radius</label>
-    <select id="radius" [value]="filters().radius" (change)="go({ radius: +$any($event.target).value })">
-      @if (!radiusChoices.includes(filters().radius)) {
-        <option [value]="filters().radius">{{ filters().radius }} miles</option>
+      </div>
+
+      @if (filterChips().length) {
+        <div class="checks" aria-label="Active filters">
+          @for (chip of filterChips(); track chip.id) {
+            <button type="button" class="chip" (click)="go(chip.patch)">Remove {{ chip.label }}</button>
+          }
+          <button type="button" class="ghost" (click)="reset()">Reset</button>
+        </div>
       }
-      <option value="10">10 miles</option>
-      <option value="25">25 miles</option>
-      <option value="50">50 miles</option>
-      <option value="100">100 miles</option>
-    </select>
-  </div>
-
-</div>
-
-@if (error()) {
-  <p class="note" role="alert">{{ error() }}</p>
-  <div class="row-actions">
-    <button type="button" (click)="retry()">Retry</button>
-    <button type="button" class="ghost" (click)="reset()">Start over</button>
-  </div>
-}
-
-@if (active()) {
-  @if (filterChips().length) {
-    <div class="checks" style="margin-top: 1rem" aria-label="Active filters">
-      @for (chip of filterChips(); track chip.id) {
-        <button type="button" class="chip" (click)="go(chip.patch)">Remove {{ chip.label }}</button>
+      @for (note of unsupported(); track note) {
+        <p class="note">{{ note }}</p>
       }
-      <button type="button" class="ghost" (click)="reset()">Reset</button>
+      @if (error()) {
+        <p class="note" role="alert">{{ error() }}</p>
+        <div class="row-actions">
+          <button type="button" (click)="retry()">Retry</button>
+          <button type="button" class="ghost" (click)="reset()">Start over</button>
+        </div>
+      }
+
+      <details class="panel compact">
+        <summary>Filters</summary>
+        <label for="near">City or ZIP</label>
+        <input id="near" type="text" [value]="nearDraft()" (input)="onNear($any($event.target).value)" (keydown.enter)="applyNear(); $event.preventDefault()" autocomplete="off" />
+        @if (suggestions().length) {
+          <ul class="suggest">
+            @for (hit of suggestions(); track hit.value) {
+              <li><button type="button" (click)="pickPlace(hit)">{{ placeCase(hit.label) }}</button></li>
+            }
+          </ul>
+        }
+        <label for="radius">Radius</label>
+        <select id="radius" [value]="filters().radius" (change)="go({ radius: +$any($event.target).value })">
+          @if (!radiusChoices.includes(filters().radius)) {
+            <option [value]="filters().radius">{{ filters().radius }} miles</option>
+          }
+          <option value="10">10 miles</option>
+          <option value="25">25 miles</option>
+          <option value="50">50 miles</option>
+          <option value="100">100 miles</option>
+        </select>
+        <p class="field-label">Provider type</p>
+        <div class="checks">
+          @for (group of groups; track group.key) {
+            <label>
+              <input type="checkbox" [checked]="filters().groups.includes(group.key)" (change)="toggle(filters().groups, group.key, 'groups')" />
+              {{ group.label }}
+            </label>
+          }
+        </div>
+        @if (facets()?.specialties?.length) {
+          <p class="field-label">Specialty</p>
+          <div class="checks">
+            @for (item of facets()!.specialties; track item.code) {
+              <label>
+                <input type="checkbox" [checked]="filters().specialties.includes(item.code)" (change)="toggle(filters().specialties, item.code, 'specialties')" />
+                {{ item.label }}
+              </label>
+            }
+          </div>
+        }
+        @if (facets()?.credentials?.length) {
+          <p class="field-label">Credentials</p>
+          <div class="checks">
+            @for (item of facets()!.credentials; track item.token) {
+              <label>
+                <input type="checkbox" [checked]="filters().credentials.includes(item.token)" (change)="toggle(filters().credentials, item.token, 'credentials')" />
+                {{ item.token }}
+              </label>
+            }
+          </div>
+        }
+        <fieldset>
+          <legend>Sex</legend>
+          <div class="checks">
+            <label><input type="radio" name="sex" [checked]="filters().sex === null" (change)="go({ sex: null })" /> Any</label>
+            <label><input type="radio" name="sex" [checked]="filters().sex === 'F'" (change)="go({ sex: 'F' })" /> Women</label>
+            <label><input type="radio" name="sex" [checked]="filters().sex === 'M'" (change)="go({ sex: 'M' })" /> Men</label>
+          </div>
+        </fieldset>
+      </details>
     </div>
-  }
-  <div class="row-actions" style="margin-top: 1rem">
-    <p class="muted" aria-live="polite">{{ loading() ? 'Searching' : (total() === 1 ? '1 provider' : total() + ' providers') }}</p>
-    <label>
-      Sort
-      <select [value]="filters().sort" (change)="go({ sort: $any($event.target).value })">
-        <option value="name">Name</option>
-        <option value="distance" [disabled]="!filters().near">Distance</option>
-        <option value="relevance" [disabled]="!filters().q">Relevance</option>
-      </select>
-    </label>
-  </div>
 
-  <div class="split" [class.map-mode]="showMap() && !wide()">
-    @if (!showMap() || wide()) {
-      <div id="results">
+    <div class="drawer-sheet">
+      <button type="button" class="drawer-handle" [attr.aria-expanded]="!drawerClosed()" (click)="cycleDrawer()" (keydown)="onHandleKey($event)" (pointerdown)="dragStart($event)" (pointermove)="dragMove($event)" (pointerup)="dragEnd()" (pointercancel)="dragEnd()">
+        <span class="handle-bar" aria-hidden="true"></span>
+        {{ drawerClosed() ? 'Show providers' : 'Providers' }}
+      </button>
+      <div class="drawer-scroll" id="results">
+        <div class="row-actions">
+          <p class="muted" aria-live="polite">{{ loading() ? 'Searching this area' : (total() === 1 ? '1 provider' : total() + ' providers') }}</p>
+          <label>
+            Sort
+            <select [value]="filters().sort" (change)="go({ sort: $any($event.target).value })">
+              <option value="name">Name</option>
+              <option value="distance" [disabled]="!filters().near">Distance</option>
+              <option value="relevance" [disabled]="!filters().q">Relevance</option>
+            </select>
+          </label>
+        </div>
+        @if (picked(); as person) {
+          <article class="detail-card">
+            <strong>{{ placeCase(person.fullName) }}</strong>
+            @if (person.credentialText) {
+              <span>{{ credentialLine(person.credentialText) }}</span>
+            }
+            @if (person.primarySpecialty) {
+              <span class="result-role">{{ person.primarySpecialty }}</span>
+            }
+            <span class="result-place">{{ streetCase(person.addressLine1) }} {{ placeCase(person.city) }} {{ person.zip5 }}</span>
+            @if (person.phone) {
+              <a [href]="'tel:' + person.phone">{{ phoneText(person.phone) }}</a>
+            }
+            <div class="row-actions">
+              <a class="button" [routerLink]="['/provider', person.npi]">Full profile</a>
+              <button type="button" class="ghost" (click)="picked.set(null)">Close</button>
+            </div>
+          </article>
+        }
         @if (loading()) {
           <div class="skeleton"></div>
           <div class="skeleton"></div>
           <div class="skeleton"></div>
         } @else if (total() === 0) {
-          <p>{{ emptyLine() }}</p>
+          <p>{{ active() ? emptyLine() : 'No providers in this view. Zoom out or clear a filter.' }}</p>
           <div class="row-actions">
             @if (filters().near && filters().radius < 50) {
               <button type="button" (click)="go({ radius: 50 })">Widen to 50 miles</button>
@@ -100,86 +158,25 @@
           </div>
         } @else {
           @for (item of items(); track item.npi) {
-            <a class="result" [id]="'result-' + item.npi" [class.selected]="selectedNpi() === item.npi" [routerLink]="['/provider', item.npi]" (pointerenter)="selectedNpi.set(item.npi)" (focus)="selectedNpi.set(item.npi)">
-              <strong>{{ placeCase(item.fullName) }}</strong>
-              @if (item.credentialText) {
-                <span>{{ credentialLine(item.credentialText) }}</span>
-              }
-              @if (item.primarySpecialty) {
-                <span class="result-role">{{ item.primarySpecialty }}</span>
-              }
-              <span class="result-place">{{ placeCase(item.city) }}@if (item.distanceMiles !== null) { · {{ distanceText(item.distanceMiles) }} }</span>
-              @if (item.phone) {
-                <span>{{ phoneText(item.phone) }}</span>
-              }
-            </a>
+            <article class="result" [id]="'result-' + item.npi" [class.selected]="selectedNpi() === item.npi">
+              <button type="button" class="result-hit" (click)="choose(item.npi)" (pointerenter)="highlight(item.npi)" (focus)="highlight(item.npi)">
+                <strong>{{ placeCase(item.fullName) }}</strong>
+                @if (item.credentialText) {
+                  <span>{{ credentialLine(item.credentialText) }}</span>
+                }
+                @if (item.primarySpecialty) {
+                  <span class="result-role">{{ item.primarySpecialty }}</span>
+                }
+                <span class="result-place">{{ placeCase(item.city) }}@if (item.distanceMiles !== null) { · {{ distanceText(item.distanceMiles) }} }</span>
+              </button>
+            </article>
           }
           @if (items().length < total()) {
             <button type="button" (click)="showMore()" [disabled]="loadingMore()">Show more</button>
           }
         }
+        <p class="muted">Each marker is a provider at a ZIP center, not a street address.</p>
       </div>
-    }
-    @if (wide() || showMap()) {
-      <div class="map-column">
-        <app-result-map [places]="items()" [selected]="selectedNpi()" [loading]="loading()" (selectPlace)="showOnMap($event)" />
-        <p class="muted">Each marker is a provider at a ZIP center, not a street address. Tiles from OpenStreetMap.</p>
-      </div>
-    }
-  </div>
-  <button type="button" class="map-toggle" [attr.aria-pressed]="showMap()" (click)="showMap.set(!showMap())">{{ showMap() ? 'List' : 'Map' }}</button>
-}
-
-<div class="stack">
-  <details class="panel">
-    <summary>Provider type</summary>
-    <div class="checks">
-      @for (group of groups; track group.key) {
-        <label>
-          <input type="checkbox" [checked]="filters().groups.includes(group.key)" (change)="toggle(filters().groups, group.key, 'groups')" />
-          {{ group.label }}
-        </label>
-      }
     </div>
-  </details>
-
-  @if (facets()?.specialties?.length) {
-    <details class="panel">
-      <summary>Specialty</summary>
-      <div class="checks">
-        @for (item of facets()!.specialties; track item.code) {
-          <label>
-            <input type="checkbox" [checked]="filters().specialties.includes(item.code)" (change)="toggle(filters().specialties, item.code, 'specialties')" />
-            {{ item.label }}
-          </label>
-        }
-      </div>
-    </details>
-  }
-
-  @if (facets()?.credentials?.length) {
-    <details class="panel">
-      <summary>Credentials</summary>
-      <p class="muted">Self-reported on the NPI registry. A degree is not the same as an Oregon license.</p>
-      <div class="checks">
-        @for (item of facets()!.credentials; track item.token) {
-          <label>
-            <input type="checkbox" [checked]="filters().credentials.includes(item.token)" (change)="toggle(filters().credentials, item.token, 'credentials')" />
-            {{ item.token }}
-          </label>
-        }
-      </div>
-    </details>
-  }
-
-  <fieldset class="panel">
-    <legend>Sex</legend>
-    <div class="checks">
-      <label><input type="radio" name="sex" [checked]="filters().sex === null" (change)="go({ sex: null })" /> Any</label>
-      <label><input type="radio" name="sex" [checked]="filters().sex === 'F'" (change)="go({ sex: 'F' })" /> Women</label>
-      <label><input type="radio" name="sex" [checked]="filters().sex === 'M'" (change)="go({ sex: 'M' })" /> Men</label>
-    </div>
-  </fieldset>
+  </aside>
 </div>
-</div>
-
