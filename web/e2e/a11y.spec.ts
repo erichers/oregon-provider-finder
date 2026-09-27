@@ -75,6 +75,7 @@ async function serious(page: import('@playwright/test').Page) {
 }
 
 test('search, results, and a profile have no serious accessibility violations', async ({ page }) => {
+  // A mid-fade sample blends the type into the page and fails contrast.
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await stub(page);
   await page.setViewportSize({ width: 390, height: 844 });
