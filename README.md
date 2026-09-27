@@ -16,7 +16,7 @@ I am a licensed counselor in Oregon. I had already built a statewide directory o
 
 - Seven clinician groups, from the NUCC taxonomy, limited to people with an Oregon practice address and an active NPI.
 - City or ZIP search from Census ZIP centroids. Distance is in statute miles.
-- Care-need presets, credential filters, and a sex filter. The registry's sex field is sparse.
+- Care-need presets, credential filters, and a sex filter. The sex field is self-reported.
 - A map of result counts by ZIP.
 - Plain-words search. The model proposes filters. The server checks them and drops anything the registry cannot answer, including insurance.
 - A crisis line on every page: call or text 988.
@@ -37,7 +37,12 @@ You need the .NET 10 SDK, Node.js 22.22 or newer, and PostgreSQL 18 listening on
 ./scripts/dev.sh
 ```
 
-The API is at <http://localhost:5080> and the app is at <http://localhost:4200>. `docker-compose.yml` starts a Postgres 18 if you do not already have one. It uses port 5432.
+The API is at <http://localhost:5080> and the app is at <http://localhost:4200>. If you do not already have Postgres, start the optional container, then point setup at it. It uses port 5432.
+
+```bash
+docker compose up -d
+PGHOST=localhost PGUSER=postgres PGPASSWORD=postgres ./scripts/setup.sh
+```
 
 ## Plain-words search
 
@@ -61,7 +66,7 @@ The committed snapshot is the September 2026 NPPES dissemination, Oregon clinici
 ./scripts/refresh-data.sh --export
 ```
 
-`--export` writes `data/snapshot` again. The export stops if the snapshot would pass 25 MB.
+`--export` writes `data/snapshot` again. The export exits non-zero if the snapshot passes 25 MB. Do not commit that snapshot.
 
 ## Architecture
 

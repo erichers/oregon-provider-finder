@@ -39,6 +39,9 @@
     }
     <label for="radius">Radius</label>
     <select id="radius" [value]="filters().radius" (change)="go({ radius: +$any($event.target).value })">
+      @if (!radiusChoices.includes(filters().radius)) {
+        <option [value]="filters().radius">{{ filters().radius }} miles</option>
+      }
       <option value="10">10 miles</option>
       <option value="25">25 miles</option>
       <option value="50">50 miles</option>
@@ -55,7 +58,7 @@
 
 @if (active()) {
   <div class="row-actions" style="margin-top: 1rem">
-    <p class="muted" aria-live="polite">{{ loading() ? 'Searching' : total() + ' providers' }}</p>
+    <p class="muted" aria-live="polite">{{ loading() ? 'Searching' : (total() === 1 ? '1 provider' : total() + ' providers') }}</p>
     <label>
       Sort
       <select [value]="filters().sort" (change)="go({ sort: $any($event.target).value })">

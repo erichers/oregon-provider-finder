@@ -2,7 +2,7 @@
 
 Checked 2026-09-27.
 
-- `git log -p | scripts/check-secrets.sh` printed `check-secrets: ok`. Tracked files were scanned the same way in CI.
+- `scripts/check-secrets.sh --history` and `scripts/check-secrets.sh --tracked` both printed `check-secrets: ok` after the scan was fixed. CI calls `--tracked`. A piped scan uses `--stdin`.
 - `opf_app` can read `providers` and cannot insert. `psql` as that role returned `permission denied for table providers`.
 - Search text is limited to 200 characters, a city or ZIP to 80, filter lists to a few hundred characters, page to 200, page size to 50, and radius to 100 miles. Groups, specialties, credentials, presets, sex, and sort are whitelisted. Plain-words text is limited to 300 characters. The location lookup keeps 40 characters.
 - `POST /api/search/interpret` is limited to 20 requests a minute per IP. The 21st returns 429.

@@ -37,7 +37,10 @@ public static partial class RulesInterpreter
 
         foreach (var token in CredentialTokenizer.KnownTokens)
         {
-            if (Word().Matches(text).Any(match => string.Equals(match.Value, token, StringComparison.OrdinalIgnoreCase)))
+            // Two-letter tokens are also English words (do, ma). Those match only
+            // when the person typed the credential in capitals.
+            var comparison = token.Length <= 2 ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+            if (Word().Matches(text).Any(match => string.Equals(match.Value, token, comparison)))
             {
                 draft.Credentials.Add(token);
             }

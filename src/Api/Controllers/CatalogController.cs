@@ -39,7 +39,7 @@ public sealed class CatalogController(AppDbContext db, ChainStatusStore chain, I
 
         var specialties = await specialtyQuery
             .GroupBy(t => t.Code)
-            .Select(g => new { code = g.Key, count = g.Count() })
+            .Select(g => new { code = g.Key, count = g.Select(t => t.Npi).Distinct().Count() })
             .OrderByDescending(item => item.count)
             .Take(80)
             .ToListAsync(cancellationToken);

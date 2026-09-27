@@ -80,6 +80,16 @@ public sealed class DirectoryTests(ApiFactory factory) : IClassFixture<ApiFactor
     }
 
     [Fact]
+    public async Task Facets_count_people_not_taxonomy_rows()
+    {
+        var facets = await Read("/api/facets?groups=mft");
+        var row = facets.GetProperty("specialties").EnumerateArray()
+            .First(item => item.GetProperty("code").GetString() == "106H00000X");
+        var search = await Read("/api/providers?groups=mft&specialties=106H00000X&pageSize=1");
+        Assert.Equal(search.GetProperty("total").GetInt32(), row.GetProperty("count").GetInt32());
+    }
+
+    [Fact]
     public async Task Locations_find_Salem()
     {
         var body = await Read("/api/locations?q=salem");

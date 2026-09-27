@@ -23,6 +23,7 @@ export class SearchPage {
   private nearTimer = 0;
 
   readonly groups = GROUPS;
+  readonly radiusChoices = [10, 25, 50, 100];
   readonly presets = PRESETS;
   readonly filters = computed(() => readQuery(this.queryMap()));
   readonly items = signal<ProviderSummary[]>([]);
