@@ -108,4 +108,4 @@ A completion to `nvidia/nemotron-3.5-lightning-30b-a3b` with `chat_template_kwar
 
 ## Map tiles
 
-OpenStreetMap tile usage is noted when the map is added. The app will show the OSM attribution.
+The map uses the OpenStreetMap standard tile server and shows the OSM attribution. Policy: https://operations.osmfoundation.org/policies/tiles/. Markers are ZIP centers. Details are in `docs/design.md`.

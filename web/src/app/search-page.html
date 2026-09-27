@@ -1,0 +1,163 @@
+<form class="stack" (submit)="submitWords($event)">
+  <div>
+    <label for="words">Describe who you're looking for</label>
+    <input id="words" type="search" [value]="words()" (input)="words.set($any($event.target).value)" placeholder="Nurse practitioner in Salem" />
+  </div>
+  <button type="submit" [disabled]="interpreting()">{{ interpreting() ? 'Reading that' : 'Search' }}</button>
+</form>
+
+<div class="stack">
+  <p class="field-label" id="care-needs">Care needs</p>
+  <div class="checks" role="group" aria-labelledby="care-needs">
+    @for (preset of presets; track preset.key) {
+      <button type="button" class="chip" [attr.aria-pressed]="filters().preset === preset.key" (click)="pickPreset(preset.key)">{{ preset.label }}</button>
+    }
+  </div>
+</div>
+
+@if (understood().length) {
+  <div class="checks" style="margin-top: 0.75rem">
+    @for (chip of understood(); track chip.kind + chip.label) {
+      <button type="button" class="chip" (click)="removeChip(chip)">Remove {{ chip.label }}</button>
+    }
+  </div>
+}
+@for (note of unsupported(); track note) {
+  <p class="note">{{ note }}</p>
+}
+
+<div class="stack">
+  <fieldset class="panel">
+    <legend>Provider type</legend>
+    <div class="checks">
+      @for (group of groups; track group.key) {
+        <label>
+          <input type="checkbox" [checked]="filters().groups.includes(group.key)" (change)="toggle(filters().groups, group.key, 'groups')" />
+          {{ group.label }}
+        </label>
+      }
+    </div>
+  </fieldset>
+
+  @if (facets()?.specialties?.length) {
+    <fieldset class="panel">
+      <legend>Specialty</legend>
+      <div class="checks">
+        @for (item of facets()!.specialties; track item.code) {
+          <label>
+            <input type="checkbox" [checked]="filters().specialties.includes(item.code)" (change)="toggle(filters().specialties, item.code, 'specialties')" />
+            {{ item.label }}
+          </label>
+        }
+      </div>
+    </fieldset>
+  }
+
+  <div class="panel">
+    <label for="near">City or ZIP</label>
+    <input id="near" type="text" [value]="nearDraft()" (input)="onNear($any($event.target).value)" (keydown.enter)="applyNear(); $event.preventDefault()" autocomplete="off" />
+    @if (suggestions().length) {
+      <ul class="suggest">
+        @for (hit of suggestions(); track hit.value) {
+          <li><button type="button" (click)="pickPlace(hit)">{{ placeCase(hit.label) }}</button></li>
+        }
+      </ul>
+    }
+    <label for="radius">Radius</label>
+    <select id="radius" [value]="filters().radius" (change)="go({ radius: +$any($event.target).value })">
+      <option value="10">10 miles</option>
+      <option value="25">25 miles</option>
+      <option value="50">50 miles</option>
+      <option value="100">100 miles</option>
+    </select>
+  </div>
+
+  @if (facets()?.credentials?.length) {
+    <fieldset class="panel">
+      <legend>Credentials</legend>
+      <p class="muted">Self-reported on the NPI registry. A degree is not the same as an Oregon license.</p>
+      <div class="checks">
+        @for (item of facets()!.credentials; track item.token) {
+          <label>
+            <input type="checkbox" [checked]="filters().credentials.includes(item.token)" (change)="toggle(filters().credentials, item.token, 'credentials')" />
+            {{ item.token }}
+          </label>
+        }
+      </div>
+    </fieldset>
+  }
+
+  <fieldset class="panel">
+    <legend>Sex</legend>
+    <div class="checks">
+      <label><input type="radio" name="sex" [checked]="filters().sex === null" (change)="go({ sex: null })" /> Any</label>
+      <label><input type="radio" name="sex" [checked]="filters().sex === 'F'" (change)="go({ sex: 'F' })" /> Women</label>
+      <label><input type="radio" name="sex" [checked]="filters().sex === 'M'" (change)="go({ sex: 'M' })" /> Men</label>
+    </div>
+  </fieldset>
+</div>
+
+@if (error()) {
+  <p class="note" role="alert">{{ error() }}</p>
+  <button type="button" class="ghost" (click)="retry()">Retry</button>
+}
+
+@if (active()) {
+  <div class="row-actions" style="margin-top: 1rem">
+    <p class="muted" aria-live="polite">{{ loading() ? 'Searching' : total() + ' providers' }}</p>
+    <label>
+      Sort
+      <select [value]="filters().sort" (change)="go({ sort: $any($event.target).value })">
+        <option value="name">Name</option>
+        <option value="distance" [disabled]="!filters().near">Distance</option>
+        <option value="relevance" [disabled]="!filters().q">Relevance</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="split" [class.map-mode]="showMap() && !wide()">
+    @if (!showMap() || wide()) {
+      <div id="results">
+        @if (loading()) {
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+        } @else if (total() === 0) {
+          <p>{{ emptyLine() }}</p>
+          <div class="row-actions">
+            @if (filters().near && filters().radius < 50) {
+              <button type="button" (click)="go({ radius: 50 })">Widen to 50 miles</button>
+            }
+            @if (filters().specialties.length) {
+              <button type="button" class="ghost" (click)="go({ specialties: [] })">Remove Specialty</button>
+            }
+          </div>
+        } @else {
+          @for (item of items(); track item.npi) {
+            <a class="result" [routerLink]="['/provider', item.npi]">
+              <strong>{{ placeCase(item.fullName) }}</strong>
+              @if (item.credentialText) {
+                <span>{{ item.credentialText }}</span>
+              }
+              <span>{{ item.primarySpecialty }}</span>
+              <span>{{ placeCase(item.city) }}@if (item.distanceMiles !== null) { · {{ item.distanceMiles }} mi }</span>
+              @if (item.phone) {
+                <span>{{ phoneText(item.phone) }}</span>
+              }
+            </a>
+          }
+          @if (items().length < total()) {
+            <button type="button" (click)="showMore()" [disabled]="loadingMore()">Show more</button>
+          }
+        }
+      </div>
+    }
+    @if (wide() || showMap()) {
+      <div class="map-column">
+        <app-result-map [points]="points()" />
+        <p class="muted">ZIP centers, not street addresses. Map data from OpenStreetMap.</p>
+      </div>
+    }
+  </div>
+  <button type="button" class="map-toggle" (click)="showMap.set(!showMap())">{{ showMap() ? 'List' : 'Map' }}</button>
+}
