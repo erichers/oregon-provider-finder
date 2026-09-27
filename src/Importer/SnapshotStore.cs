@@ -22,6 +22,7 @@ static class SnapshotStore
         await conn.OpenAsync();
         await CopyOutAsync(conn, ProviderColumns, "providers", Path.Combine(dir, "providers.csv.gz"), "npi");
         await CopyOutAsync(conn, ["npi", "code", "is_primary", "license_number", "license_state"], "provider_taxonomies", Path.Combine(dir, "provider_taxonomies.csv.gz"), "npi, code, id");
+        await CopyOutAsync(conn, ["npi", "address_line1", "address_line2", "city", "state", "postal_code", "phone"], "provider_locations", Path.Combine(dir, "provider_locations.csv.gz"), "npi, id");
 
         var providers = await CountAsync(conn, "providers");
         var taxonomies = await CountAsync(conn, "provider_taxonomies");
@@ -44,13 +45,18 @@ static class SnapshotStore
         await using var conn = new NpgsqlConnection(connectionString);
         await conn.OpenAsync();
         await using var tx = await conn.BeginTransactionAsync();
-        await using (var truncate = new NpgsqlCommand("TRUNCATE provider_taxonomies, providers", conn, tx))
+        await using (var truncate = new NpgsqlCommand("TRUNCATE provider_locations, provider_taxonomies, providers", conn, tx))
         {
             await truncate.ExecuteNonQueryAsync();
         }
 
         await CopyInAsync(conn, ProviderColumns, "providers", Path.Combine(dir, "providers.csv.gz"));
         await CopyInAsync(conn, ["npi", "code", "is_primary", "license_number", "license_state"], "provider_taxonomies", Path.Combine(dir, "provider_taxonomies.csv.gz"));
+        var locationsPath = Path.Combine(dir, "provider_locations.csv.gz");
+        if (File.Exists(locationsPath))
+        {
+            await CopyInAsync(conn, ["npi", "address_line1", "address_line2", "city", "state", "postal_code", "phone"], "provider_locations", locationsPath);
+        }
         await ImportSwap.RebuildCitiesAsync(conn, tx);
         await using (var run = new NpgsqlCommand(
             """

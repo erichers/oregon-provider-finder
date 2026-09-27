@@ -30,6 +30,21 @@ public sealed class Provider
     public NpgsqlTsVector SearchVector { get; set; } = null!;
 
     public List<ProviderTaxonomy> Taxonomies { get; set; } = [];
+    public List<ProviderLocation> Locations { get; set; } = [];
+}
+
+public sealed class ProviderLocation
+{
+    public long Id { get; set; }
+    public string Npi { get; set; } = "";
+    public string? AddressLine1 { get; set; }
+    public string? AddressLine2 { get; set; }
+    public string? City { get; set; }
+    public string? State { get; set; }
+    public string? PostalCode { get; set; }
+    public string? Phone { get; set; }
+
+    public Provider Provider { get; set; } = null!;
 }
 
 public sealed class ProviderTaxonomy

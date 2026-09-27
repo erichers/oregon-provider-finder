@@ -103,6 +103,16 @@ export interface ProviderDetail {
   registryLastUpdated: string | null;
   registryUrl: string;
   taxonomies: TaxonomyItem[];
+  otherLocations?: PracticeLocation[];
+}
+
+export interface PracticeLocation {
+  addressLine1: string | null;
+  addressLine2: string | null;
+  city: string | null;
+  state: string | null;
+  postalCode: string | null;
+  phone: string | null;
 }
 
 export interface MetaResponse {
