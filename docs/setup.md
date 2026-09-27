@@ -15,7 +15,7 @@ dotnet build
 cd web && npm ci && npm run build
 ```
 
-`scripts/setup.sh` and `scripts/dev.sh` arrive in a later phase. They will create the database roles, apply migrations, and load the snapshot.
+`./scripts/setup.sh` checks the toolchain, creates the roles and both databases, stores the connection strings in user-secrets, applies migrations, and loads the ZIP centroids, the NUCC subset, and the snapshot. `./scripts/dev.sh` starts the API and the Angular app. `./scripts/refresh-data.sh` runs a full NPPES import. `docker-compose.yml` is an optional Postgres 18 for a machine that does not already have one. It publishes port 5432, so it stays unused on a machine where Postgres is already there.
 
 `data/snapshot` is the committed Oregon extract (about 4.5 MB). `dotnet run --project src/Importer -- import snapshot` reloads providers, taxonomy links, and cities. `import geo` and `import taxonomy` load the ZIP centroids and the NUCC subset. Counts from the 2026-09-27 full import are in `docs/data-pipeline.md`.
 

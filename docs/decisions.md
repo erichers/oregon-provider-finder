@@ -64,6 +64,10 @@ ASP.NET Core 10 generates the OpenAPI document with `Microsoft.AspNetCore.OpenAp
 
 `httpResource` in the installed `@angular/common` is still marked `@experimental` (21.0.0). The screens use `HttpClient` and signals, and the search filters live in the URL.
 
+## 2026-09-27: Setup loads the taxonomy table
+
+The committed snapshot has providers, taxonomy links, and enough metadata to rebuild cities. It does not include the NUCC rows or the ZIP centroids. `setup.sh` runs `import geo`, `import taxonomy`, and `import snapshot` into both databases. A fresh checkout can search without the 1 GB NPPES zip.
+
 ## 2026-09-27: CI starts at phase 1
 
 The workflow file is added with the skeleton so GitHub checks every push. Phase 1 ran `dotnet build` and the Angular production build. Phase 7 adds the Postgres 18 service, `dotnet test`, Vitest, the Playwright smoke, and `dotnet format --verify-no-changes`.
