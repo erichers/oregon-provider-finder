@@ -52,6 +52,14 @@ EF Core maps property names to snake_case (`full_name`, `group_keys`) through EF
 
 `Npgsql.EntityFrameworkCore.PostgreSQL` 10.0.3 depends on EF Core 10.0.4. The Design package had resolved to 10.0.12, and the build warned that 10.0.4 won the conflict. Design, EF Core, and the relational package are pinned to 10.0.4 so the importer and the design-time factory load one version.
 
+## 2026-09-27: Scalar for the Development API reference
+
+ASP.NET Core 10 generates the OpenAPI document with `Microsoft.AspNetCore.OpenApi`. Microsoft Learn's ASP.NET Core 10 OpenAPI page shows Scalar (`MapScalarApiReference`) as the interactive UI on top of that document. `Scalar.AspNetCore` 2.17.10 is mapped only when the host is Development, at `/scalar`. The document itself is `/openapi/v1.json`.
+
+## 2026-09-27: Meta cache keeps chain status fresh
+
+`/api/facets` uses output caching for 10 minutes. `/api/meta` caches the import row and the provider count for 10 minutes, and reads the in-memory chain status on every request. A single output-cached meta response would keep showing an empty chain after the first interpret call.
+
 ## 2026-09-27: CI starts at phase 1
 
 The workflow file is added with the skeleton so GitHub checks every push. Phase 1 runs `dotnet build` and the Angular production build. Test jobs are added when those tests exist (phase 7).

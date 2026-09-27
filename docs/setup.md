@@ -6,6 +6,8 @@ Verified on 2026-09-27.
 - Node.js 22.22.3 or newer on the 22 line. Angular CLI 22.2.0 rejects Node 22.21. This machine uses `.tools/node`.
 - PostgreSQL 18 listening on localhost:5432. Homebrew's `postgresql@18` formula (18.6) is installed here. `brew services` has no plist for that formula, so the cluster is started with `pg_ctl`. See `docs/decisions.md`.
 
+The API listens on `http://localhost:5080` (`dotnet run --project src/Api`). In Development it allows the Angular origin `http://localhost:4200`, serves OpenAPI at `/openapi/v1.json`, and serves the Scalar reference at `/scalar`. Plain-words search needs provider keys in user-secrets (`Llm:Groq:Keys:0` and the matching NVIDIA, Cerebras, and Gemini names). Without keys, interpret uses the rules interpreter.
+
 From a checkout:
 
 ```bash
