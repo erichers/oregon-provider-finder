@@ -370,16 +370,18 @@ details.panel summary {
   outline-offset: 2px;
 }
 
-.marker-cluster-small,
-.marker-cluster-medium,
-.marker-cluster-large {
-  background-color: rgba(47, 93, 70, 0.28);
-}
-
-.marker-cluster div {
-  background-color: #2f5d46;
+.cluster-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: 6px;
+  border-radius: 50%;
+  background: #2f5d46;
   color: #fff;
-  font-family: "Public Sans", sans-serif;
+  border: 2px solid #c98b2b;
+  font-size: 0.8rem;
 }
 
 .map-popup p {

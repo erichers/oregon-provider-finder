@@ -13,9 +13,30 @@ export interface MapPlace {
 
 export const oregonView = { lat: 44.0, lng: -120.5, zoom: 6 };
 
+export interface PlaceGroup {
+  key: string;
+  lat: number;
+  lng: number;
+  places: Array<MapPlace & { lat: number; lng: number }>;
+}
+
 export function plottable(places: MapPlace[]): Array<MapPlace & { lat: number; lng: number }> {
   return places.filter((place): place is MapPlace & { lat: number; lng: number } =>
     typeof place.lat === 'number' && typeof place.lng === 'number');
+}
+
+export function clusterPlaces(places: MapPlace[]): PlaceGroup[] {
+  const groups = new Map<string, PlaceGroup>();
+  for (const place of plottable(places)) {
+    const key = `${place.lat.toFixed(3)},${place.lng.toFixed(3)}`;
+    const existing = groups.get(key);
+    if (existing) {
+      existing.places.push(place);
+    } else {
+      groups.set(key, { key, lat: place.lat, lng: place.lng, places: [place] });
+    }
+  }
+  return [...groups.values()];
 }
 
 export function popupLines(place: MapPlace): string[] {

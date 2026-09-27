@@ -59,8 +59,14 @@ test('a marker selects its card and a card selects its marker', async ({ page })
   });
 
   await page.goto('/?q=grant');
-  await expect(page.locator('.pin').first()).toBeVisible();
-  await page.locator('.pin').first().click();
+  const cluster = page.locator('.marker-cluster').first();
+  const pin = page.locator('.pin').first();
+  await expect(cluster.or(pin)).toBeVisible();
+  if (await cluster.isVisible()) {
+    await cluster.click();
+  }
+  await expect(pin).toBeVisible();
+  await pin.click();
   await expect(page.locator('.map-popup a')).toHaveText('Profile');
   const selected = await page.locator('a.result.selected').getAttribute('id');
   const cards = ['result-1548266448', 'result-1003827965'];

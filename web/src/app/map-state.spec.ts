@@ -1,4 +1,4 @@
-import { escapeHtml, oregonView, plottable, popupLines, MapPlace } from './map-state';
+import { clusterPlaces, escapeHtml, oregonView, plottable, popupLines, MapPlace } from './map-state';
 
 const salem: MapPlace = {
   npi: '1548266448',
@@ -24,6 +24,12 @@ describe('map state', () => {
     expect(oregonView.zoom).toBe(6);
     expect(oregonView.lat).toBeGreaterThan(42);
     expect(oregonView.lat).toBeLessThan(46);
+  });
+
+  it('groups providers that share a ZIP center', () => {
+    const groups = clusterPlaces([salem, { ...salem, npi: '1003827965' }, { ...salem, npi: '1111111111', lat: 45.5, lng: -122.6 }]);
+    expect(groups).toHaveLength(2);
+    expect(groups.find((group) => group.lat === salem.lat)?.places).toHaveLength(2);
   });
 
   it('builds a popup from the fields a person can use', () => {

@@ -104,4 +104,4 @@ Ivy reviewed the branch after phase 11. The secret scan used `grep -q` in a pipe
 
 ## 2026-09-27: Map markers are the providers on the page
 
-The map plots the providers in the current list, at their ZIP centroid, and clusters the ones that land on the same point. A click on a marker selects that card. Pointing at a card highlights its marker. With nothing to plot, the map stays on a view of Oregon. Tiles are OpenStreetMap, attributed, with a zoom cap of 16. If a tile fails, the markers stay and a line says the tiles did not load. No tile key is required.
+The map plots the providers in the current list, at their ZIP centroid, and groups the ones that land on the same point. Leaflet.markercluster expects a global Leaflet object, which the Angular build does not provide, so the grouping lives next to the map instead of in that plugin. A click on a marker selects that card. Pointing at a card highlights its marker. With nothing to plot, the map stays on a view of Oregon. Tiles are OpenStreetMap, attributed, with a zoom cap of 16. If a tile fails, the markers stay and a line says the tiles did not load. No tile key is required.
