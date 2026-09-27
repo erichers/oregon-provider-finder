@@ -23,6 +23,14 @@ Ochre `#C98B2B` is used for focus rings, selected chip borders, and map markers.
 
 Focus is a 3px ochre outline, offset 3px, with a 2px ink ring between the control and the outline.
 
+## Hierarchy
+
+The wordmark is the only large title. A result card is a name in Source Serif 4, then the credential, the specialty, and a muted place line. The profile puts specialties and the practice address in separate panels. Spacing uses a 0.25rem step: 0.5, 0.75, 1, and 1.5 rem.
+
+Active filters sit above the count as chips. Each chip removes that one filter. Reset clears the search. While results load, flat skeleton bars stand in for the cards. An empty list offers a wider radius or dropping a specialty. An error offers Retry and Start over.
+
 ## Map tiles
 
-The map uses OpenStreetMap's standard tile server and shows the OSM attribution. The usage policy is https://operations.osmfoundation.org/policies/tiles/. This is a light, local directory, not a tile scraper. Markers are ZIP centers, and the page says so.
+The map uses OpenStreetMap's standard tile server and shows the OSM attribution. The usage policy is https://operations.osmfoundation.org/policies/tiles/. This is a light, local directory, not a tile scraper. Each marker is a provider at a ZIP center, and the page says so. People who share a center are grouped until that group is opened.
+
+A Playwright check with axe runs against the home page, a result list, and a profile, and fails the build on a serious or critical violation.

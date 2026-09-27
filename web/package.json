@@ -29,6 +29,7 @@
     "@angular/build": "^22.2.0",
     "@angular/cli": "^22.2.0",
     "@angular/compiler-cli": "^22.2.0",
+    "@axe-core/playwright": "^4.10.2",
     "@playwright/test": "^1.56.1",
     "@types/leaflet": "^1.9.22",
     "jsdom": "^30.0.0",

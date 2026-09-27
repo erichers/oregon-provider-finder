@@ -26,6 +26,33 @@ export class SearchPage {
   readonly radiusChoices = [10, 25, 50, 100];
   readonly presets = PRESETS;
   readonly filters = computed(() => readQuery(this.queryMap()));
+  readonly filterChips = computed(() => {
+    const query = this.filters();
+    const chips: { id: string; label: string; patch: Partial<SearchQuery> }[] = [];
+    if (query.q) {
+      chips.push({ id: 'q', label: query.q, patch: { q: null } });
+    }
+    if (query.preset) {
+      chips.push({ id: 'preset', label: PRESETS.find((item) => item.key === query.preset)?.label ?? query.preset, patch: { preset: null } });
+    }
+    for (const key of query.groups) {
+      chips.push({ id: 'group-' + key, label: groupLabel(key), patch: { groups: query.groups.filter((group) => group !== key) } });
+    }
+    for (const code of query.specialties) {
+      const label = this.facets()?.specialties.find((item) => item.code === code)?.label ?? code;
+      chips.push({ id: 'specialty-' + code, label, patch: { specialties: query.specialties.filter((item) => item !== code) } });
+    }
+    for (const token of query.credentials) {
+      chips.push({ id: 'credential-' + token, label: token, patch: { credentials: query.credentials.filter((item) => item !== token) } });
+    }
+    if (query.near) {
+      chips.push({ id: 'near', label: `${placeCase(query.near)}, ${query.radius} miles`, patch: { near: null, sort: 'name' } });
+    }
+    if (query.sex) {
+      chips.push({ id: 'sex', label: query.sex === 'F' ? 'Women' : 'Men', patch: { sex: null } });
+    }
+    return chips;
+  });
   readonly items = signal<ProviderSummary[]>([]);
   readonly total = signal(0);
   readonly facets = signal<Facets | null>(null);
@@ -100,6 +127,13 @@ export class SearchPage {
         this.facets.set(facets);
       }
     });
+  }
+
+  reset() {
+    this.words.set('');
+    this.understood.set([]);
+    this.unsupported.set([]);
+    void this.router.navigate(['/']);
   }
 
   showOnMap(npi: string) {

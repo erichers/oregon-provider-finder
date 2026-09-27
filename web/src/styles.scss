@@ -250,9 +250,22 @@ details.panel summary {
 
 .result strong {
   font-family: var(--serif);
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 500;
   color: var(--fir);
+}
+
+.result {
+  padding: 1rem 0;
+  gap: 0.25rem;
+}
+
+.result-role {
+  color: var(--ink);
+}
+
+.result-place {
+  color: var(--muted);
 }
 
 .skeleton {
