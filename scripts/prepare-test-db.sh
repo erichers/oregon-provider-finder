@@ -26,7 +26,7 @@ fi
 
 export OPF_OWNER_CONNECTION="Host=localhost;Port=5432;Database=oregon_providers_test;Username=opf_owner;Password=${password}"
 dotnet tool restore
-dotnet ef database update --project src/Core --startup-project src/Api
+dotnet ef database update --project src/Core --startup-project src/Core
 
 "${psql[@]}" -d oregon_providers_test <<'SQL'
 GRANT USAGE ON SCHEMA public TO opf_app;
