@@ -29,8 +29,10 @@ The wordmark is the only large title. A result card is a name in Source Serif 4,
 
 Active filters sit above the count as chips. Each chip removes that one filter. Reset clears the search. While results load, flat skeleton bars stand in for the cards. When motion is allowed, a new page and the result cards rise about 8 pixels and fade in over roughly 200 milliseconds. Reduced motion turns that off. An empty list offers a wider radius or dropping a specialty. An error offers Retry and Start over.
 
-## Map tiles
+## Map
 
-The map uses OpenStreetMap's standard tile server and shows the OSM attribution. The usage policy is https://operations.osmfoundation.org/policies/tiles/. This is a light, local directory, not a tile scraper. Each marker is a provider at a ZIP center, and the page says so. People who share a center are grouped until that group is opened.
+On the search page the map fills the window under the crisis line. A drawer about 400 pixels wide sits on the left on a wide screen and can collapse to a handle. On a phone the same list is a bottom sheet with a handle, and the search bar stays in a compact card at the top. Choosing a card opens a short profile in the drawer. Full profile still goes to the provider page.
+
+Tiles come from the OpenStreetMap tile server. The page shows the OSM attribution. The usage policy is https://operations.osmfoundation.org/policies/tiles/. CARTO's raster CDN now requires a key, so it is not used. No key is required. Each marker is a provider at a ZIP center, and the drawer says so. Nearby markers cluster, and the cluster splits when it is opened.
 
 A Playwright check with axe runs against the home page, a result list, and a profile, and fails the build on a serious or critical violation.
