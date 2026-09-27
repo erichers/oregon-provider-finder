@@ -10,6 +10,10 @@ public static class CredentialTokenizer
         "LCPC", "LMHC", "APRN", "ARNP", "CNP",
     };
 
+    public static bool IsKnown(string token) => Known.Contains(token);
+
+    public static IReadOnlyCollection<string> KnownTokens => Known;
+
     public static string[] Tokenize(string? raw)
     {
         if (string.IsNullOrWhiteSpace(raw))

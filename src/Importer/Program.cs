@@ -67,6 +67,25 @@ if (args is ["export", "snapshot"])
     return 0;
 }
 
+if (args is ["llm", "probe", ..])
+{
+    string? poison = null;
+    for (var i = 2; i < args.Length; i++)
+    {
+        if (args[i] == "--poison" && i + 1 < args.Length)
+        {
+            poison = args[++i];
+        }
+        else
+        {
+            Console.Error.WriteLine($"Unknown argument {args[i]}");
+            return 1;
+        }
+    }
+
+    return await LlmProbe.RunAsync(repo, poison);
+}
+
 if (args is ["import", "snapshot"])
 {
     await SnapshotStore.ImportAsync(connectionString, repo);
@@ -80,5 +99,5 @@ if (args is ["checksum"])
     return 0;
 }
 
-Console.Error.WriteLine("Commands: import full [--file <zip>] [--download-latest] | import geo | import snapshot | export snapshot | checksum");
+Console.Error.WriteLine("Commands: import full [--file <zip>] [--download-latest] | import geo | import snapshot | export snapshot | checksum | llm probe [--poison <provider>]");
 return 1;
