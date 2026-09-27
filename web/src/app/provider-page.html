@@ -5,7 +5,7 @@
 @if (detail(); as provider) {
   <h2 class="provider-name">{{ placeCase(provider.fullName) }}</h2>
   @if (provider.credentialText) {
-    <p>{{ provider.credentialText }}</p>
+    <p>{{ credentialLine(provider.credentialText) }}</p>
   }
   <h3>Specialties</h3>
   <ul>

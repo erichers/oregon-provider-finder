@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FinderApi, MetaResponse, ProviderDetail } from './finder-api';
-import { formatDate, phoneText, placeCase } from './format';
+import { credentialLine, formatDate, phoneText, placeCase, streetCase } from './format';
 
 @Component({
   selector: 'app-provider-page',
@@ -17,6 +17,7 @@ export class ProviderPage {
   readonly copied = signal(false);
   readonly placeCase = placeCase;
   readonly phoneText = phoneText;
+  readonly credentialLine = credentialLine;
   readonly formatDate = formatDate;
 
   constructor() {
@@ -31,7 +32,8 @@ export class ProviderPage {
   }
 
   address(detail: ProviderDetail): string {
-    return [detail.addressLine1, detail.addressLine2, detail.city, 'OR', detail.zip5].filter(Boolean).join(', ');
+    const cityLine = [placeCase(detail.city), 'OR', detail.zip5].filter(Boolean).join(' ');
+    return [streetCase(detail.addressLine1), streetCase(detail.addressLine2), cityLine].filter(Boolean).join(', ');
   }
 
   mapsUrl(detail: ProviderDetail): string {

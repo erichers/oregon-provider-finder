@@ -13,6 +13,53 @@ const MONTHS = [
   'December',
 ];
 
+const upperWords = new Set(['SW', 'SE', 'NW', 'NE', 'N', 'S', 'E', 'W', 'US', 'PO']);
+
+const credentialWords: Record<string, string> = {
+  'M.D.': 'MD',
+  'D.O.': 'DO',
+  'PH.D.': 'PhD',
+  'PHD': 'PhD',
+  'PSYD': 'PsyD',
+};
+
+export function streetCase(value: string | null): string {
+  if (!value) {
+    return '';
+  }
+  const trimmed = value.trim();
+  if (trimmed !== trimmed.toUpperCase()) {
+    return trimmed;
+  }
+  if (/^[A-Z0-9]+-[A-Z0-9]+$/.test(trimmed)) {
+    return trimmed;
+  }
+  return trimmed.toLowerCase().replace(/\b[a-z0-9]+\b/g, (word) => {
+    const upper = word.toUpperCase();
+    if (upperWords.has(upper)) {
+      return upper;
+    }
+    if (/^\d/.test(word)) {
+      return word;
+    }
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  });
+}
+
+export function credentialLine(value: string | null): string {
+  if (!value) {
+    return '';
+  }
+  return value
+    .split(',')
+    .map((part) => {
+      const token = part.trim();
+      return credentialWords[token.toUpperCase()] ?? token;
+    })
+    .filter((token) => token.length > 0)
+    .join(', ');
+}
+
 export function placeCase(value: string | null): string {
   if (!value) {
     return '';

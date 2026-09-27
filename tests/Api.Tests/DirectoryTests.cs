@@ -62,6 +62,24 @@ public sealed class DirectoryTests(ApiFactory factory) : IClassFixture<ApiFactor
     }
 
     [Fact]
+    public async Task Locations_skip_one_off_city_spellings()
+    {
+        var body = await Read("/api/locations?q=port");
+        var labels = body.EnumerateArray().Select(item => item.GetProperty("label").GetString()).ToArray();
+        Assert.Contains("PORTLAND", labels);
+        Assert.DoesNotContain("PORTAND", labels);
+        Assert.DoesNotContain("PORTLAN", labels);
+    }
+
+    [Fact]
+    public async Task Facets_omit_specialties_with_no_name()
+    {
+        var body = await Read("/api/facets?groups=physician");
+        var labels = body.GetProperty("specialties").EnumerateArray().Select(item => item.GetProperty("label").GetString() ?? "");
+        Assert.DoesNotContain(labels, label => label.Length == 10 && label.All(char.IsLetterOrDigit));
+    }
+
+    [Fact]
     public async Task Locations_find_Salem()
     {
         var body = await Read("/api/locations?q=salem");
