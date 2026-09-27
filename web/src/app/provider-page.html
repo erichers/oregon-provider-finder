@@ -13,10 +13,10 @@
       <li>
         {{ item.displayName || item.code }}
         @if (item.isPrimary) {
-          <span class="muted">Primary</span>
+          <span class="muted"> · Primary</span>
         }
         @if (item.licenseNumber) {
-          <span>License {{ item.licenseNumber }}@if (item.licenseState) { ({{ item.licenseState }}) }</span>
+          <span> · License {{ item.licenseNumber }}@if (item.licenseState) { ({{ item.licenseState }}) }</span>
         }
       </li>
     }
