@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Api/">
+    <Project Path="src/Api/OregonProviderFinder.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/Core/">
+    <Project Path="src/Core/OregonProviderFinder.Core.csproj" />
+  </Folder>
+  <Folder Name="/src/Importer/">
+    <Project Path="src/Importer/OregonProviderFinder.Importer.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/Api.Tests/">
+    <Project Path="tests/Api.Tests/OregonProviderFinder.Api.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Core.Tests/">
+    <Project Path="tests/Core.Tests/OregonProviderFinder.Core.Tests.csproj" />
+  </Folder>
+</Solution>
