@@ -45,7 +45,8 @@ export class ResultMap {
         weight: 1,
         fillColor: '#c98b2b',
         fillOpacity: 0.9,
-      }).bindTooltip(`${point.zip5}: ${point.count}`, { direction: 'top' }),
+      }).bindTooltip(`${point.zip5}: ${point.count}`, { direction: 'top' })
+        .bindPopup(`${point.zip5}: ${point.count} providers`),
     );
     markers.forEach((marker) => this.layer?.addLayer(marker));
     if (markers.length > 0 && this.map) {

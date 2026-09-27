@@ -41,7 +41,7 @@ public sealed class CatalogController(AppDbContext db, ChainStatusStore chain, I
             .GroupBy(t => t.Code)
             .Select(g => new { code = g.Key, count = g.Count() })
             .OrderByDescending(item => item.count)
-            .Take(40)
+            .Take(80)
             .ToListAsync(cancellationToken);
         var labels = await db.Taxonomies.AsNoTracking().ToDictionaryAsync(t => t.Code, t => t.DisplayName, cancellationToken);
         var specialtyRows = specialties.Select(item => new
@@ -49,7 +49,9 @@ public sealed class CatalogController(AppDbContext db, ChainStatusStore chain, I
             item.code,
             label = labels.GetValueOrDefault(item.code) ?? item.code,
             item.count,
-        });
+        })
+        .Where(item => !string.Equals(item.label, item.code, StringComparison.OrdinalIgnoreCase))
+        .Take(40);
 
         var credentialArrays = await db.Providers.AsNoTracking().Select(p => p.Credentials).ToListAsync(cancellationToken);
         var credentials = credentialArrays
@@ -87,7 +89,7 @@ public sealed class CatalogController(AppDbContext db, ChainStatusStore chain, I
         if (items.Count < 8)
         {
             var cities = await db.Cities.AsNoTracking()
-                .Where(c => EF.Functions.ILike(c.DisplayName, clean + "%"))
+                .Where(c => c.ProviderCount >= 3 && EF.Functions.ILike(c.DisplayName, clean + "%"))
                 .OrderByDescending(c => c.ProviderCount)
                 .Take(8 - items.Count)
                 .Select(c => new { kind = "city", label = c.DisplayName, value = c.DisplayName })

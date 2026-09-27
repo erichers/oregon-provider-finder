@@ -3,7 +3,7 @@
     <label for="words">Describe who you're looking for</label>
     <input id="words" type="search" [value]="words()" (input)="words.set($any($event.target).value)" placeholder="Nurse practitioner in Salem" />
   </div>
-  <button type="submit" [disabled]="interpreting()">{{ interpreting() ? 'Reading that' : 'Search' }}</button>
+  <button type="submit" [disabled]="interpreting()">{{ interpreting() ? 'Searching' : 'Search' }}</button>
 </form>
 
 <div class="stack">
@@ -27,32 +27,6 @@
 }
 
 <div class="stack">
-  <fieldset class="panel">
-    <legend>Provider type</legend>
-    <div class="checks">
-      @for (group of groups; track group.key) {
-        <label>
-          <input type="checkbox" [checked]="filters().groups.includes(group.key)" (change)="toggle(filters().groups, group.key, 'groups')" />
-          {{ group.label }}
-        </label>
-      }
-    </div>
-  </fieldset>
-
-  @if (facets()?.specialties?.length) {
-    <fieldset class="panel">
-      <legend>Specialty</legend>
-      <div class="checks">
-        @for (item of facets()!.specialties; track item.code) {
-          <label>
-            <input type="checkbox" [checked]="filters().specialties.includes(item.code)" (change)="toggle(filters().specialties, item.code, 'specialties')" />
-            {{ item.label }}
-          </label>
-        }
-      </div>
-    </fieldset>
-  }
-
   <div class="panel">
     <label for="near">City or ZIP</label>
     <input id="near" type="text" [value]="nearDraft()" (input)="onNear($any($event.target).value)" (keydown.enter)="applyNear(); $event.preventDefault()" autocomplete="off" />
@@ -72,29 +46,6 @@
     </select>
   </div>
 
-  @if (facets()?.credentials?.length) {
-    <fieldset class="panel">
-      <legend>Credentials</legend>
-      <p class="muted">Self-reported on the NPI registry. A degree is not the same as an Oregon license.</p>
-      <div class="checks">
-        @for (item of facets()!.credentials; track item.token) {
-          <label>
-            <input type="checkbox" [checked]="filters().credentials.includes(item.token)" (change)="toggle(filters().credentials, item.token, 'credentials')" />
-            {{ item.token }}
-          </label>
-        }
-      </div>
-    </fieldset>
-  }
-
-  <fieldset class="panel">
-    <legend>Sex</legend>
-    <div class="checks">
-      <label><input type="radio" name="sex" [checked]="filters().sex === null" (change)="go({ sex: null })" /> Any</label>
-      <label><input type="radio" name="sex" [checked]="filters().sex === 'F'" (change)="go({ sex: 'F' })" /> Women</label>
-      <label><input type="radio" name="sex" [checked]="filters().sex === 'M'" (change)="go({ sex: 'M' })" /> Men</label>
-    </div>
-  </fieldset>
 </div>
 
 @if (error()) {
@@ -137,9 +88,11 @@
             <a class="result" [routerLink]="['/provider', item.npi]">
               <strong>{{ placeCase(item.fullName) }}</strong>
               @if (item.credentialText) {
-                <span>{{ item.credentialText }}</span>
+                <span>{{ credentialLine(item.credentialText) }}</span>
               }
-              <span>{{ item.primarySpecialty }}</span>
+              @if (item.primarySpecialty) {
+                <span>{{ item.primarySpecialty }}</span>
+              }
               <span>{{ placeCase(item.city) }}@if (item.distanceMiles !== null) { · {{ distanceText(item.distanceMiles) }} }</span>
               @if (item.phone) {
                 <span>{{ phoneText(item.phone) }}</span>
@@ -161,3 +114,56 @@
   </div>
   <button type="button" class="map-toggle" (click)="showMap.set(!showMap())">{{ showMap() ? 'List' : 'Map' }}</button>
 }
+
+<div class="stack">
+  <details class="panel">
+    <summary>Provider type</summary>
+    <div class="checks">
+      @for (group of groups; track group.key) {
+        <label>
+          <input type="checkbox" [checked]="filters().groups.includes(group.key)" (change)="toggle(filters().groups, group.key, 'groups')" />
+          {{ group.label }}
+        </label>
+      }
+    </div>
+  </details>
+
+  @if (facets()?.specialties?.length) {
+    <details class="panel">
+      <summary>Specialty</summary>
+      <div class="checks">
+        @for (item of facets()!.specialties; track item.code) {
+          <label>
+            <input type="checkbox" [checked]="filters().specialties.includes(item.code)" (change)="toggle(filters().specialties, item.code, 'specialties')" />
+            {{ item.label }}
+          </label>
+        }
+      </div>
+    </details>
+  }
+
+  @if (facets()?.credentials?.length) {
+    <details class="panel">
+      <summary>Credentials</summary>
+      <p class="muted">Self-reported on the NPI registry. A degree is not the same as an Oregon license.</p>
+      <div class="checks">
+        @for (item of facets()!.credentials; track item.token) {
+          <label>
+            <input type="checkbox" [checked]="filters().credentials.includes(item.token)" (change)="toggle(filters().credentials, item.token, 'credentials')" />
+            {{ item.token }}
+          </label>
+        }
+      </div>
+    </details>
+  }
+
+  <fieldset class="panel">
+    <legend>Sex</legend>
+    <div class="checks">
+      <label><input type="radio" name="sex" [checked]="filters().sex === null" (change)="go({ sex: null })" /> Any</label>
+      <label><input type="radio" name="sex" [checked]="filters().sex === 'F'" (change)="go({ sex: 'F' })" /> Women</label>
+      <label><input type="radio" name="sex" [checked]="filters().sex === 'M'" (change)="go({ sex: 'M' })" /> Men</label>
+    </div>
+  </fieldset>
+</div>
+

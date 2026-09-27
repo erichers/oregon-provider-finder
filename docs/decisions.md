@@ -64,6 +64,14 @@ ASP.NET Core 10 generates the OpenAPI document with `Microsoft.AspNetCore.OpenAp
 
 `httpResource` in the installed `@angular/common` is still marked `@experimental` (21.0.0). The screens use `HttpClient` and signals, and the search filters live in the URL.
 
+## 2026-09-27: Review follow-up
+
+Wren and Nora reviewed the screens after phase 11. The list below is what changed, and what was left as it is.
+
+Provider type, specialty, and credentials are closed disclosures under the results, so the first names sit with the search box instead of under a page of checkboxes. On a 390px screen the first result starts just below the fold. Facets drop a taxonomy code when the NUCC subset has no display name for it. City suggestions require at least three providers in that city, which removes one-off registry spellings such as Portand and Portlan. A street address is title case, with SW, NE, and US left uppercase, and the ZIP sits on the city line. Credential text is split on commas. Button-styled links are not underlined. The skip link goes to the main content. The pending search label says Searching. A map marker opens a popup with the ZIP and the count. The circle size was already the count.
+
+The fixed Map button still sits over the list while it scrolls. The page has extra space at the bottom so the last card clears it. The button stays fixed because that is how a phone reaches the map. Markers still overlap in the Portland area because many ZIP centers are close together. Each marker is one ZIP, not one provider.
+
 ## 2026-09-27: Review
 
 The review pass looked at the API, the screens at 390 and 1440, the README, and the setup script.
