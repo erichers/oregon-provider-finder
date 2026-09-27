@@ -77,7 +77,7 @@ await framed(desktop, "results-desktop", "localhost:4200/?groups=physician&near=
 await framed(desktop, "map-desktop", "localhost:4200/?groups=physician&near=Portland&radius=25", 1440);
 
 await phone.goto(base + resultsUrl, { waitUntil: "domcontentloaded" });
-await phone.locator(".drawer-handle").click();
+await phone.locator(".drawer-toggle").click();
 await phone.waitForSelector(".result");
 await phone.waitForSelector(".map-frame.leaflet-container");
 await phone.waitForSelector(".drawer-sheet");

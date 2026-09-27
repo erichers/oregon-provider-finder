@@ -6,7 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { catchError, debounceTime, of, Subject, switchMap } from 'rxjs';
 import { GROUPS, PRESETS, groupLabel } from './catalog';
 import { Facets, FinderApi, LocationHit, MapBounds, ProviderDetail, ProviderSummary, UnderstoodItem } from './finder-api';
-import { nextSnap, sheetExpanded, sheetLabel, snapHeights } from './drawer-state';
+import { chevronDir, nextSnap, sheetExpanded, sheetLabel, snapHeights, toggleLabel } from './drawer-state';
 import { credentialLabel, distanceText, placeCase, phoneText, streetCase } from './format';
 import { ResultMap } from './map-view';
 import { SearchQuery, isActive, readQuery, toParams } from './query';
@@ -83,6 +83,7 @@ export class SearchPage {
   readonly drawerClosed = signal(false);
   readonly filtersOpen = signal(false);
   readonly dragging = signal(false);
+  readonly listScrolled = signal(false);
   readonly wide = signal(false);
   readonly page = signal(1);
   readonly active = computed(() => isActive(this.filters()));
@@ -201,7 +202,19 @@ export class SearchPage {
   }
 
   labelText(): string {
-    return sheetLabel(this.wide(), this.drawerClosed(), this.loading(), this.total());
+    return sheetLabel(this.loading(), this.total());
+  }
+
+  toggleText(): string {
+    return toggleLabel(this.expanded());
+  }
+
+  arrowDir(): 'left' | 'right' | 'up' | 'down' {
+    return chevronDir(this.wide(), this.expanded());
+  }
+
+  onListScroll(event: Event) {
+    this.listScrolled.set((event.target as HTMLElement).scrollTop > 8);
   }
 
   expanded(): boolean {
@@ -227,7 +240,7 @@ export class SearchPage {
   }
 
   dragStart(event: PointerEvent) {
-    if (this.wide() || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (this.wide() || (event.target as HTMLElement).closest('.drawer-toggle') || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return;
     }
     this.dragging.set(true);

@@ -132,7 +132,7 @@ test('the phone sheet opens further from the handle', async ({ page }) => {
   const sheet = page.locator('.drawer-sheet');
   await expect(sheet).toBeVisible();
   const before = await sheet.evaluate((el) => el.getBoundingClientRect().height);
-  await page.locator('.drawer-handle').click();
+  await page.locator('.drawer-toggle').click();
   await expect.poll(async () => sheet.evaluate((el) => el.getBoundingClientRect().height)).toBeGreaterThan(before + 40);
 });
 
@@ -142,11 +142,15 @@ test('the desktop drawer collapses from the handle', async ({ page }) => {
     await route.fulfill({ json: { total: 0, page: 1, pageSize: 40, center: null, items: [], groups: [], specialties: [], credentials: [] } });
   });
   await page.goto('/');
-  const handle = page.locator('.drawer-handle');
-  await expect(handle).toHaveAttribute('aria-expanded', 'true');
-  await handle.click();
+  const toggle = page.locator('.drawer-toggle');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  await expect(toggle).toHaveAttribute('aria-label', 'Hide provider list');
+  await toggle.click();
   await expect(page.locator('.drawer')).toHaveClass(/closed/);
-  await expect(handle).toHaveAttribute('aria-expanded', 'false');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(toggle).toHaveAttribute('aria-label', 'Show provider list');
+  await expect(toggle).toBeVisible();
+  await expect(page.locator('.handle-bar')).toHaveCount(0);
 });
 
 test('care needs sit in one scrolling row and the page does not scroll sideways', async ({ page }) => {
@@ -162,4 +166,7 @@ test('care needs sit in one scrolling row and the page does not scroll sideways'
   const extra = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(extra).toBeLessThanOrEqual(1);
   await expect(page.getByRole('button', { name: 'Filters', exact: true })).toHaveAttribute('aria-expanded', 'false');
+  const strip = page.locator('.filter-strip');
+  expect(await strip.evaluate((el) => getComputedStyle(el).flexWrap)).toBe('nowrap');
+  expect(await strip.evaluate((el) => getComputedStyle(el).overflowX)).toBe('auto');
 });

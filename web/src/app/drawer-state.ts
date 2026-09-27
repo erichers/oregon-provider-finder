@@ -6,20 +6,28 @@ export interface SnapHeights {
 
 export function snapHeights(viewport: number): SnapHeights {
   return {
-    peek: 112,
+    peek: 64,
     half: Math.round(viewport * 0.46),
     full: Math.max(280, viewport - 132),
   };
 }
 
-export function sheetLabel(wide: boolean, closed: boolean, loading: boolean, total: number): string {
-  if (wide && closed) {
-    return 'Show providers';
-  }
+export function sheetLabel(loading: boolean, total: number): string {
   if (loading) {
     return 'Searching';
   }
   return total === 1 ? '1 provider' : `${total} providers`;
+}
+
+export function toggleLabel(expanded: boolean): string {
+  return expanded ? 'Hide provider list' : 'Show provider list';
+}
+
+export function chevronDir(wide: boolean, expanded: boolean): 'left' | 'right' | 'up' | 'down' {
+  if (wide) {
+    return expanded ? 'left' : 'right';
+  }
+  return expanded ? 'down' : 'up';
 }
 
 export function sheetExpanded(wide: boolean, closed: boolean, height: number, peek: number): boolean {
