@@ -1,14 +1,16 @@
 <a class="skip" href="#main">Skip to content</a>
 <div class="shell" [class.map-app]="mapFirst()">
-  <header class="top">
-    <h1><a class="wordmark" routerLink="/">Oregon Provider Finder</a></h1>
-    <nav class="nav" aria-label="Directory">
-      <a routerLink="/">Search</a>
-      <a routerLink="/about-data">About the data</a>
-      <a href="https://github.com/erichers/oregon-provider-finder">GitHub</a>
-    </nav>
-  </header>
-  <p class="crisis">In crisis? <a href="tel:988">Call 988</a> or <a href="sms:988">text 988</a></p>
+  <div class="mast">
+    <header class="top">
+      <h1><a class="wordmark" routerLink="/">Oregon Provider Finder</a></h1>
+      <nav class="nav" aria-label="Directory">
+        <a routerLink="/">Search</a>
+        <a routerLink="/about-data">About the data</a>
+        <a href="https://github.com/erichers/oregon-provider-finder">GitHub</a>
+      </nav>
+    </header>
+    <p class="crisis">In crisis? <a href="tel:988">Call 988</a> or <a href="sms:988">text 988</a></p>
+  </div>
   <main id="main" tabindex="-1">
     <router-outlet />
   </main>

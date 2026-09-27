@@ -28,6 +28,7 @@ async function framed(page, name, urlLabel, displayWidth) {
     const image = document.getElementById("shot");
     image.src = src;
     image.style.width = width + "px";
+    document.querySelector(".window").style.width = width + "px";
     const pill = document.getElementById("url");
     pill.textContent = label;
     pill.style.maxWidth = Math.max(160, width - 90) + "px";
@@ -76,6 +77,7 @@ await framed(desktop, "results-desktop", "localhost:4200/?groups=physician&near=
 await framed(desktop, "map-desktop", "localhost:4200/?groups=physician&near=Portland&radius=25", 1440);
 
 await phone.goto(base + resultsUrl, { waitUntil: "domcontentloaded" });
+await phone.locator(".drawer-handle").click();
 await phone.waitForSelector(".result");
 await phone.waitForSelector(".map-frame.leaflet-container");
 await phone.waitForSelector(".drawer-sheet");

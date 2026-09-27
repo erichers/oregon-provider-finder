@@ -7,7 +7,8 @@
     [reveal]="reveal()"
     [wide]="wide()"
     (selectPlace)="choose($event)"
-    (boundsChange)="onBounds($event)" />
+    (boundsChange)="onBounds($event)"
+    (highlightPlace)="highlight($event)" />
 
   <aside class="drawer" [class.closed]="drawerClosed()" [class.dragging]="dragging()" [style.--sheet.px]="sheetHeight()">
     <div class="float-search">
@@ -43,8 +44,15 @@
         </div>
       }
 
-      <details class="panel compact">
-        <summary>Filters</summary>
+      <button type="button" class="ghost filter-toggle" [attr.aria-expanded]="filtersOpen()" aria-controls="filter-panel" (click)="filtersOpen.update((open) => !open)">Filters</button>
+      <div id="filter-panel" class="filter-panel" [hidden]="!filtersOpen()">
+        <label for="sort">Sort
+          <select id="sort" [value]="filters().sort" (change)="go({ sort: $any($event.target).value })">
+            <option value="name">Name</option>
+            <option value="distance" [disabled]="!filters().near">Distance</option>
+            <option value="relevance" [disabled]="!filters().q">Relevance</option>
+          </select>
+        </label>
         <label for="near">City or ZIP</label>
         <input id="near" type="text" [value]="nearDraft()" (input)="onNear($any($event.target).value)" (keydown.enter)="applyNear(); $event.preventDefault()" autocomplete="off" />
         @if (suggestions().length) {
@@ -103,26 +111,15 @@
             <label><input type="radio" name="sex" [checked]="filters().sex === 'M'" (change)="go({ sex: 'M' })" /> Men</label>
           </div>
         </fieldset>
-      </details>
+      </div>
     </div>
 
     <div class="drawer-sheet">
-      <button type="button" class="drawer-handle" [attr.aria-expanded]="!drawerClosed()" (click)="cycleDrawer()" (keydown)="onHandleKey($event)" (pointerdown)="dragStart($event)" (pointermove)="dragMove($event)" (pointerup)="dragEnd()" (pointercancel)="dragEnd()">
+      <button type="button" class="drawer-handle" [attr.aria-expanded]="expanded()" aria-controls="results" aria-live="polite" (click)="cycleDrawer()" (keydown)="onHandleKey($event)" (pointerdown)="dragStart($event)" (pointermove)="dragMove($event)" (pointerup)="dragEnd()" (pointercancel)="dragEnd()">
         <span class="handle-bar" aria-hidden="true"></span>
-        {{ drawerClosed() ? 'Show providers' : 'Providers' }}
+        {{ labelText() }}
       </button>
       <div class="drawer-scroll" id="results">
-        <div class="row-actions">
-          <p class="muted" aria-live="polite">{{ loading() ? 'Searching this area' : (total() === 1 ? '1 provider' : total() + ' providers') }}</p>
-          <label>
-            Sort
-            <select [value]="filters().sort" (change)="go({ sort: $any($event.target).value })">
-              <option value="name">Name</option>
-              <option value="distance" [disabled]="!filters().near">Distance</option>
-              <option value="relevance" [disabled]="!filters().q">Relevance</option>
-            </select>
-          </label>
-        </div>
         @if (picked(); as person) {
           <article class="detail-card">
             <strong>{{ placeCase(person.fullName) }}</strong>

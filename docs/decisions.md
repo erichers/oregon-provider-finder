@@ -127,3 +127,7 @@ The NPPES practice location file is already in the September 2026 zip. `import l
 Oregon license status, type, and expiration stay off the profile. The Medical Board open data file is aggregate counts. Individual lookup is behind a terms page, and a licensee list is a paid records request. The Board of Nursing sells a mailing list and otherwise takes a records request. Neither is a bulk file or public API this directory can copy. A license number on the profile, when present, is the number the provider typed into NPPES.
 
 The other-organization-name file and the endpoint file stay in the zip and are not imported. The other-name file is a separate national list of organization names and a type code, not a verified affiliation. The endpoint file is electronic endpoints, not practice locations.
+
+## 2026-09-27: The map bar floats
+
+The search page header and the 988 line share one slim bar over the map, and the crisis links stay in that bar. The search field is a pill. Care needs are one scrolling row of chips. Sort and the rest of the filters open from a Filters button. On a phone the list starts as a short peek that names the count, so the map stays in view. The framed screenshots were wider than the 390px capture because the window chrome stretched past the image. The frame is now the same width as the shot.

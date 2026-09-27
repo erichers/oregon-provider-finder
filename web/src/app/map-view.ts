@@ -34,6 +34,7 @@ export class ResultMap {
   readonly reveal = input(0);
   readonly wide = input(false);
   readonly selectPlace = output<string>();
+  readonly highlightPlace = output<string>();
   readonly boundsChange = output<MapBounds>();
   readonly tilesFailed = signal(false);
   readonly locateNote = signal<string | null>(null);
@@ -153,6 +154,7 @@ export class ResultMap {
       });
       marker.bindPopup(this.popup(place));
       marker.on('click', () => this.selectPlace.emit(place.npi));
+      marker.on('mouseover', () => this.highlightPlace.emit(place.npi));
       this.markers.set(place.npi, marker);
       cluster.addLayer(marker);
     }
@@ -175,7 +177,7 @@ export class ResultMap {
     const wide = this.wide();
     const pad = wide
       ? { paddingTopLeft: L.point(440, 96), paddingBottomRight: L.point(48, 48) }
-      : { paddingTopLeft: L.point(20, 150), paddingBottomRight: L.point(20, Math.round(window.innerHeight * 0.42)) };
+      : { paddingTopLeft: L.point(16, 168), paddingBottomRight: L.point(16, 150) };
     if (reduce) {
       map.fitBounds(cluster.getBounds(), { ...pad, maxZoom: 13 });
     } else {
@@ -195,11 +197,17 @@ export class ResultMap {
 
   private applySelection(L: LeafletApi, npi: string | null, reveal: boolean) {
     const cluster = this.cluster;
-    if (!cluster) {
+    const map = this.map;
+    if (!cluster || !map) {
       return;
     }
     for (const [id, marker] of this.markers) {
-      marker.setIcon(this.pin(L, id === npi));
+      const el = marker.getElement();
+      if (el) {
+        el.classList.toggle('selected', id === npi);
+      } else {
+        marker.setIcon(this.pin(L, id === npi));
+      }
     }
     if (!npi || !reveal) {
       return;
@@ -211,13 +219,22 @@ export class ResultMap {
     const visible = cluster.getVisibleParent(marker);
     if (visible && visible !== marker) {
       cluster.zoomToShowLayer(marker, () => undefined);
+      return;
+    }
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const zoom = Math.min(15, Math.max(map.getZoom(), 13));
+    this.fitting = true;
+    if (reduce) {
+      map.setView(marker.getLatLng(), zoom);
+    } else {
+      map.flyTo(marker.getLatLng(), zoom, { duration: 0.45 });
     }
   }
 
   private pin(L: LeafletApi, selected: boolean) {
     return L.divIcon({
       className: selected ? 'pin-wrap selected' : 'pin-wrap',
-      html: '<span class="pin"></span>',
+      html: '<span class="pin pin-in"></span>',
       iconSize: [44, 44],
       iconAnchor: [22, 22],
       popupAnchor: [0, -16],

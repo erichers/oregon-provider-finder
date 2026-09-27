@@ -12,6 +12,23 @@ export function snapHeights(viewport: number): SnapHeights {
   };
 }
 
+export function sheetLabel(wide: boolean, closed: boolean, loading: boolean, total: number): string {
+  if (wide && closed) {
+    return 'Show providers';
+  }
+  if (loading) {
+    return 'Searching';
+  }
+  return total === 1 ? '1 provider' : `${total} providers`;
+}
+
+export function sheetExpanded(wide: boolean, closed: boolean, height: number, peek: number): boolean {
+  if (wide) {
+    return !closed;
+  }
+  return height > peek + 8;
+}
+
 export function nextSnap(current: number, velocity: number, snaps: SnapHeights): number {
   const points = [snaps.peek, snaps.half, snaps.full];
   if (velocity > 0.45) {

@@ -132,6 +132,34 @@ test('the phone sheet opens further from the handle', async ({ page }) => {
   const sheet = page.locator('.drawer-sheet');
   await expect(sheet).toBeVisible();
   const before = await sheet.evaluate((el) => el.getBoundingClientRect().height);
-  await page.getByRole('button', { name: 'Providers' }).click();
+  await page.locator('.drawer-handle').click();
   await expect.poll(async () => sheet.evaluate((el) => el.getBoundingClientRect().height)).toBeGreaterThan(before + 40);
+});
+
+test('the desktop drawer collapses from the handle', async ({ page }) => {
+  await page.setViewportSize({ width: 1200, height: 800 });
+  await page.route('**/api/**', async (route) => {
+    await route.fulfill({ json: { total: 0, page: 1, pageSize: 40, center: null, items: [], groups: [], specialties: [], credentials: [] } });
+  });
+  await page.goto('/');
+  const handle = page.locator('.drawer-handle');
+  await expect(handle).toHaveAttribute('aria-expanded', 'true');
+  await handle.click();
+  await expect(page.locator('.drawer')).toHaveClass(/closed/);
+  await expect(handle).toHaveAttribute('aria-expanded', 'false');
+});
+
+test('care needs sit in one scrolling row and the page does not scroll sideways', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.route('**/api/**', async (route) => {
+    await route.fulfill({ json: { total: 0, page: 1, pageSize: 40, center: null, items: [], groups: [], specialties: [], credentials: [] } });
+  });
+  await page.goto('/');
+  const row = page.locator('.care-row');
+  await expect(row).toBeVisible();
+  const wrap = await row.evaluate((el) => getComputedStyle(el).flexWrap);
+  expect(wrap).toBe('nowrap');
+  const extra = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(extra).toBeLessThanOrEqual(1);
+  await expect(page.getByRole('button', { name: 'Filters', exact: true })).toHaveAttribute('aria-expanded', 'false');
 });
