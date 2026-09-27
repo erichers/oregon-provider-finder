@@ -30,6 +30,16 @@ export function phoneText(digits: string | null): string {
   return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
 }
 
+export function distanceText(miles: number | null): string {
+  if (miles === null) {
+    return '';
+  }
+  if (miles < 1) {
+    return 'under 1 mi';
+  }
+  return `${Math.round(miles)} mi`;
+}
+
 export function formatDate(value: string | null): string {
   if (!value || value.length < 10) {
     return '';

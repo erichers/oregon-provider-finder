@@ -6,7 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { catchError, forkJoin, of, switchMap } from 'rxjs';
 import { GROUPS, PRESETS, groupLabel } from './catalog';
 import { Facets, FinderApi, LocationHit, ProviderSummary, UnderstoodItem } from './finder-api';
-import { placeCase, phoneText } from './format';
+import { distanceText, placeCase, phoneText } from './format';
 import { ResultMap } from './map-view';
 import { SearchQuery, isActive, readQuery, toParams } from './query';
 
@@ -44,6 +44,7 @@ export class SearchPage {
   readonly active = computed(() => isActive(this.filters()));
   readonly placeCase = placeCase;
   readonly phoneText = phoneText;
+  readonly distanceText = distanceText;
   readonly groupLabel = groupLabel;
 
   constructor() {
