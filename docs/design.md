@@ -27,7 +27,7 @@ Focus is a 3px ochre outline, offset 3px, with a 2px ink ring between the contro
 
 The wordmark is the only large title. A result card is a name in Source Serif 4, then the credential, the specialty, and a muted place line. The profile puts specialties and the practice address in separate panels. Spacing uses a 0.25rem step: 0.5, 0.75, 1, and 1.5 rem.
 
-Active filters sit above the count as chips. Each chip removes that one filter. Reset clears the search. While results load, flat skeleton bars stand in for the cards. An empty list offers a wider radius or dropping a specialty. An error offers Retry and Start over.
+Active filters sit above the count as chips. Each chip removes that one filter. Reset clears the search. While results load, flat skeleton bars stand in for the cards. When motion is allowed, a new page and the result cards rise about 8 pixels and fade in over roughly 200 milliseconds. Reduced motion turns that off. An empty list offers a wider radius or dropping a specialty. An error offers Retry and Start over.
 
 ## Map tiles
 
