@@ -178,7 +178,7 @@
           </div>
         } @else {
           @for (item of listed(); track item.npi) {
-            <article class="result" [id]="'result-' + item.npi" [class.selected]="selectedNpi() === item.npi">
+            <article class="result" [id]="'result-' + item.npi" [class.selected]="selectedNpi() === item.npi" [class.teased]="teaserPerson()?.npi === item.npi">
               <button type="button" class="result-hit" (click)="choose(item.npi)" (pointerenter)="highlight(item.npi)" (focus)="highlight(item.npi)">
                 <strong>{{ placeCase(item.fullName) }}</strong>
                 @if (item.credentialText) {
@@ -195,7 +195,7 @@
             <button type="button" (click)="showMore()" [disabled]="loadingMore()">{{ loadingMore() ? 'Loading' : 'Load more' }}</button>
           }
         }
-        <p class="muted">Each marker is a provider at a ZIP center, not a street address.</p>
+        <p class="muted map-note">Each marker is a provider at a ZIP center, not a street address. Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors.</p>
       </div>
     </div>
   </aside>

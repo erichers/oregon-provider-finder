@@ -1573,3 +1573,58 @@ button.filter-toggle {
     backdrop-filter: none;
   }
 }
+
+/* R1E review fixes */
+.map-note {
+  margin: 4px 0 16px;
+  padding: 8px 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-card);
+  background: var(--glass-card);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .map-note {
+    background: var(--glass-solid);
+  }
+}
+
+@media (min-width: 1024px) {
+  .drawer.closed .drawer-head {
+    width: 44px;
+    min-width: 44px;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 1023px) {
+  .result.teased {
+    display: none;
+  }
+
+  .map-app .leaflet-top.leaflet-right {
+    bottom: calc(var(--sheet, 64px) + 28px);
+  }
+
+  .map-app .leaflet-bottom.leaflet-right {
+    bottom: var(--sheet, 64px);
+    transition: opacity 180ms ease;
+  }
+
+  .map-root.zoom-quiet .leaflet-bottom.leaflet-right {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 1023px) and (prefers-reduced-motion: reduce) {
+  .map-app .leaflet-bottom.leaflet-right {
+    transition: none;
+  }
+}

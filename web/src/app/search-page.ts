@@ -123,7 +123,7 @@ export class SearchPage {
       }
       const snaps = snapHeights(window.innerHeight, reserve);
       const stripBottom = reserve - 8;
-      const zoomTop = window.innerHeight - height - 12 - 88;
+      const zoomTop = window.innerHeight - height - 28 - 88;
       this.zoomQuiet.set(height > snaps.half + 8 || zoomTop < stripBottom + 8);
     });
     afterNextRender(() => {
@@ -287,7 +287,8 @@ export class SearchPage {
     const npi = this.teaserPerson()?.npi;
     this.teaserPerson.set(null);
     this.teaserFrom = null;
-    queueMicrotask(() => {
+    // Wait for the render that shows the card again on phones, where the teaser stands in for it.
+    setTimeout(() => {
       if (!npi) {
         return;
       }
@@ -295,7 +296,7 @@ export class SearchPage {
         ? document.querySelector<HTMLElement>('.pin-wrap.selected')
         : document.querySelector<HTMLElement>('#result-' + npi + ' .result-hit');
       target?.focus();
-    });
+    }, 0);
   }
 
   @HostListener('document:keydown.escape')
