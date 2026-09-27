@@ -7,7 +7,7 @@ Checked 2026-09-27.
 - Search text is limited to 200 characters, a city or ZIP to 80, filter lists to a few hundred characters, page to 200, page size to 50, and radius to 100 miles. Groups, specialties, credentials, presets, sex, and sort are whitelisted. Plain-words text is limited to 300 characters. The location lookup keeps 40 characters.
 - `POST /api/search/interpret` is limited to 20 requests a minute per IP. The 21st returns 429.
 - The Angular templates interpolate registry and model text. There is no `innerHTML`.
-- Rejected searches return ProblemDetails with a sentence this API wrote. The host does not enable the developer exception page. The database health check swallows the driver exception and reports unhealthy.
+- Rejected searches return ProblemDetails with a sentence this API wrote. `UseExceptionHandler` runs in every environment, including Development, so a server error does not send the stack or the request headers. The database health check swallows the driver exception and reports unhealthy. A model that returns `"radius": null` is treated as an omitted radius. A parse failure moves the chain to the next model, then to the rules.
 - `dotnet list package --vulnerable --include-transitive` reported no vulnerable packages. `npm audit --omit=dev` in `web/` reported 0 vulnerabilities.
 
 Model keys stay in user-secrets. The test host uses `Testing`, so those keys are not loaded. The CI database password `ci` exists only in the Actions Postgres container.

@@ -50,7 +50,9 @@ public static class LlmDraftParser
             }
 
             draft.Place = ReadString(root, "place");
-            if (root.TryGetProperty("radius", out var radius) && radius.TryGetInt32(out var miles))
+            if (root.TryGetProperty("radius", out var radius)
+                && radius.ValueKind == JsonValueKind.Number
+                && radius.TryGetInt32(out var miles))
             {
                 draft.Radius = Math.Clamp(miles, 1, 100);
             }
