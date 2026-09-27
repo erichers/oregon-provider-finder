@@ -6,7 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { catchError, debounceTime, of, Subject, switchMap } from 'rxjs';
 import { GROUPS, PRESETS, groupLabel } from './catalog';
 import { Facets, FinderApi, LocationHit, MapBounds, ProviderDetail, ProviderSummary, UnderstoodItem } from './finder-api';
-import { chevronDir, nextSnap, sheetExpanded, sheetLabel, snapHeights, toggleLabel } from './drawer-state';
+import { chevronDir, nextSnap, phoneKey, phoneTap, sheetExpanded, sheetLabel, snapHeights, toggleLabel } from './drawer-state';
 import { credentialLabel, distanceText, placeCase, phoneText, streetCase } from './format';
 import { ResultMap } from './map-view';
 import { SearchQuery, isActive, readQuery, toParams } from './query';
@@ -213,6 +213,11 @@ export class SearchPage {
     return chevronDir(this.wide(), this.expanded());
   }
 
+  filtersAria(): string {
+    const count = this.filterChips().length;
+    return count ? `Filters, ${count} active` : 'Filters';
+  }
+
   onListScroll(event: Event) {
     this.listScrolled.set((event.target as HTMLElement).scrollTop > 8);
   }
@@ -226,17 +231,20 @@ export class SearchPage {
       this.drawerClosed.update((closed) => !closed);
       return;
     }
-    const snaps = snapHeights(window.innerHeight);
-    const order = [snaps.peek, snaps.half, snaps.full];
-    const next = order.find((point) => point > this.sheetHeight() + 24) ?? snaps.peek;
-    this.sheetHeight.set(next);
+    this.sheetHeight.set(phoneTap(this.sheetHeight(), snapHeights(window.innerHeight)));
   }
 
   onHandleKey(event: KeyboardEvent) {
-    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-      event.preventDefault();
-      this.cycleDrawer();
+    if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') {
+      return;
     }
+    event.preventDefault();
+    if (this.wide()) {
+      this.cycleDrawer();
+      return;
+    }
+    const direction = event.key === 'ArrowUp' ? 'up' : 'down';
+    this.sheetHeight.set(phoneKey(this.sheetHeight(), direction, snapHeights(window.innerHeight)));
   }
 
   dragStart(event: PointerEvent) {

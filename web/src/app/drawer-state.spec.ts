@@ -1,4 +1,4 @@
-import { chevronDir, nextSnap, sheetExpanded, sheetLabel, snapHeights, toggleLabel } from './drawer-state';
+import { chevronDir, nextSnap, phoneKey, phoneTap, sheetExpanded, sheetLabel, snapHeights, toggleLabel } from './drawer-state';
 
 describe('drawer snaps', () => {
   const snaps = snapHeights(844);
@@ -28,5 +28,15 @@ describe('drawer snaps', () => {
     expect(sheetExpanded(true, false, 64, 64)).toBe(true);
     expect(sheetExpanded(false, false, 64, 64)).toBe(false);
     expect(sheetExpanded(false, false, 388, 64)).toBe(true);
+  });
+
+  it('tapping an open phone sheet returns to the peek', () => {
+    expect(phoneTap(snaps.peek, snaps)).toBe(snaps.half);
+    expect(phoneTap(snaps.half, snaps)).toBe(snaps.peek);
+    expect(phoneTap(snaps.full, snaps)).toBe(snaps.peek);
+    expect(phoneKey(snaps.peek, 'up', snaps)).toBe(snaps.half);
+    expect(phoneKey(snaps.half, 'up', snaps)).toBe(snaps.full);
+    expect(phoneKey(snaps.full, 'down', snaps)).toBe(snaps.half);
+    expect(phoneKey(snaps.half, 'down', snaps)).toBe(snaps.peek);
   });
 });

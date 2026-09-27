@@ -135,3 +135,7 @@ The search page header and the 988 line share one slim bar over the map, and the
 ## 2026-09-27: The list opens from a chevron
 
 The gray handle pill is gone. A 44px button at the top of the list holds a chevron. On a wide screen it points left to close and right to open, and a closed drawer shrinks to that button. On a phone it points down to close and up to open, and the closed sheet is a 64px bar with the count. Dragging the bar still changes the sheet height. The arrow does not rotate when reduced motion is on. Active filters, Reset, and Filters share one scrolling row so they do not stack over the map.
+
+## 2026-09-27: Phone zoom sits above the list
+
+On a phone the plus and minus buttons move to the lower right, just above the sheet, and they rise with it. Pinch zoom stays on. Hiding the buttons was the other option. Keeping them, clear of the chips, is easier to find than pinch alone. The wide-screen control stays at the upper right. A tap on the phone arrow opens a peek to half height and closes any taller sheet back to the peek. The up and down keys still step one stop at a time. The phone title is OR Provider Finder, and the 988 line sits on the next line, so neither is clipped.

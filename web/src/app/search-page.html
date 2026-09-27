@@ -1,4 +1,4 @@
-<div class="map-root">
+<div class="map-root" [style.--sheet.px]="sheetHeight()">
   <app-result-map
     [places]="items()"
     [selected]="selectedNpi()"
@@ -18,21 +18,30 @@
         <button type="submit" [disabled]="interpreting()">{{ interpreting() ? 'Searching' : 'Search' }}</button>
       </form>
 
-      <div class="checks care-row" role="group" aria-labelledby="care-needs">
-        <p class="sr" id="care-needs">Care needs</p>
+      <div class="filter-strip" role="group" aria-label="Filters and care needs">
+        <button type="button" class="filter-toggle" [attr.aria-expanded]="filtersOpen()" [attr.aria-label]="filtersAria()" aria-controls="filter-panel" (click)="filtersOpen.update((open) => !open)">
+          <svg class="filter-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M4 6h16M7 12h10M10 18h4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+          </svg>
+          <span>Filters</span>
+          @if (filterChips().length) {
+            <span class="filter-badge" aria-hidden="true">{{ filterChips().length }}</span>
+          }
+        </button>
         @for (preset of presets; track preset.key) {
           <button type="button" class="chip" [attr.aria-pressed]="filters().preset === preset.key" (click)="pickPreset(preset.key)">{{ preset.label }}</button>
         }
-      </div>
-
-      <div class="filter-strip">
         @for (chip of filterChips(); track chip.id) {
-          <button type="button" class="chip" (click)="go(chip.patch)">Remove {{ chip.label }}</button>
+          <button type="button" class="chip" [attr.aria-label]="'Remove ' + chip.label" (click)="go(chip.patch)">
+            <span>{{ chip.label }}</span>
+            <svg class="chip-x" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M7 7l10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+            </svg>
+          </button>
         }
         @if (filterChips().length) {
-          <button type="button" class="ghost" (click)="reset()">Reset</button>
+          <button type="button" class="ghost strip-reset" (click)="reset()">Reset</button>
         }
-        <button type="button" class="ghost filter-toggle" [attr.aria-expanded]="filtersOpen()" aria-controls="filter-panel" (click)="filtersOpen.update((open) => !open)">Filters</button>
       </div>
       @for (note of unsupported(); track note) {
         <p class="note">{{ note }}</p>

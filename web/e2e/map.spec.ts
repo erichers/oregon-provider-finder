@@ -130,10 +130,33 @@ test('the phone sheet opens further from the handle', async ({ page }) => {
   });
   await page.goto('/');
   const sheet = page.locator('.drawer-sheet');
+  const toggle = page.locator('.drawer-toggle');
+  const chevron = page.locator('.chevron');
+  const height = () => sheet.evaluate((el) => el.getBoundingClientRect().height);
   await expect(sheet).toBeVisible();
-  const before = await sheet.evaluate((el) => el.getBoundingClientRect().height);
-  await page.locator('.drawer-toggle').click();
-  await expect.poll(async () => sheet.evaluate((el) => el.getBoundingClientRect().height)).toBeGreaterThan(before + 40);
+  await expect(chevron).toHaveAttribute('data-dir', 'up');
+  const peek = await height();
+  await toggle.click();
+  await expect(chevron).toHaveAttribute('data-dir', 'down');
+  await expect.poll(height).toBeGreaterThan(peek + 200);
+  const half = await height();
+  await toggle.click();
+  await expect(chevron).toHaveAttribute('data-dir', 'up');
+  await expect.poll(height).toBeLessThan(peek + 40);
+  await toggle.focus();
+  await page.keyboard.press('ArrowUp');
+  await expect(chevron).toHaveAttribute('data-dir', 'down');
+  await expect.poll(height).toBeGreaterThan(peek + 200);
+  await page.keyboard.press('ArrowUp');
+  await expect.poll(height).toBeGreaterThan(half + 200);
+  const full = await height();
+  await expect(chevron).toHaveAttribute('data-dir', 'down');
+  await page.keyboard.press('ArrowDown');
+  await expect.poll(height).toBeLessThan(full - 200);
+  await expect.poll(height).toBeGreaterThan(peek + 200);
+  await page.keyboard.press('ArrowDown');
+  await expect(chevron).toHaveAttribute('data-dir', 'up');
+  await expect.poll(height).toBeLessThan(peek + 40);
 });
 
 test('the desktop drawer collapses from the handle', async ({ page }) => {
@@ -159,14 +182,29 @@ test('care needs sit in one scrolling row and the page does not scroll sideways'
     await route.fulfill({ json: { total: 0, page: 1, pageSize: 40, center: null, items: [], groups: [], specialties: [], credentials: [] } });
   });
   await page.goto('/');
-  const row = page.locator('.care-row');
-  await expect(row).toBeVisible();
-  const wrap = await row.evaluate((el) => getComputedStyle(el).flexWrap);
-  expect(wrap).toBe('nowrap');
-  const extra = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-  expect(extra).toBeLessThanOrEqual(1);
-  await expect(page.getByRole('button', { name: 'Filters', exact: true })).toHaveAttribute('aria-expanded', 'false');
   const strip = page.locator('.filter-strip');
+  await expect(strip).toBeVisible();
   expect(await strip.evaluate((el) => getComputedStyle(el).flexWrap)).toBe('nowrap');
   expect(await strip.evaluate((el) => getComputedStyle(el).overflowX)).toBe('auto');
+  await expect(page.getByRole('button', { name: 'Filters', exact: true })).toHaveAttribute('aria-expanded', 'false');
+  const fit = await page.evaluate(() => {
+    const title = document.querySelector('.wordmark');
+    const zoom = document.querySelector('.leaflet-control-zoom');
+    const row = document.querySelector('.filter-strip');
+    if (!title || !zoom || !row) {
+      return null;
+    }
+    const a = zoom.getBoundingClientRect();
+    const b = row.getBoundingClientRect();
+    const hits = a.right > b.left && a.left < b.right && a.bottom > b.top && a.top < b.bottom;
+    return {
+      hits,
+      title: title.scrollWidth - title.clientWidth,
+      page: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    };
+  });
+  expect(fit).not.toBeNull();
+  expect(fit!.hits).toBe(false);
+  expect(fit!.title).toBeLessThanOrEqual(1);
+  expect(fit!.page).toBeLessThanOrEqual(1);
 });

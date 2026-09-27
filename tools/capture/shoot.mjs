@@ -89,7 +89,7 @@ await framed(phone, "map-phone", "localhost:4200/?groups=physician&near=Portland
 await desktop.goto(base + "/", { waitUntil: "domcontentloaded" });
 await desktop.locator("#words").fill("nurse practitioner in Salem within 10 miles");
 await desktop.getByRole("button", { name: "Search" }).click();
-await desktop.waitForSelector("text=Remove");
+await desktop.getByRole("button", { name: /^Remove / }).first().waitFor();
 await framed(desktop, "plain-words", "localhost:4200" + new URL(desktop.url()).search, 1440);
 
 await desktop.goto(base + detail, { waitUntil: "domcontentloaded" });

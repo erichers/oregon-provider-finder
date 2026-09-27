@@ -37,6 +37,22 @@ export function sheetExpanded(wide: boolean, closed: boolean, height: number, pe
   return height > peek + 8;
 }
 
+export function phoneTap(current: number, snaps: SnapHeights): number {
+  if (current > snaps.peek + 8) {
+    return snaps.peek;
+  }
+  return snaps.half;
+}
+
+export function phoneKey(current: number, direction: 'up' | 'down', snaps: SnapHeights): number {
+  const points = [snaps.peek, snaps.half, snaps.full];
+  const nearest = points.reduce((best, point) => Math.abs(point - current) < Math.abs(best - current) ? point : best);
+  if (direction === 'up') {
+    return points.find((point) => point > nearest + 8) ?? snaps.full;
+  }
+  return [...points].reverse().find((point) => point < nearest - 8) ?? snaps.peek;
+}
+
 export function nextSnap(current: number, velocity: number, snaps: SnapHeights): number {
   const points = [snaps.peek, snaps.half, snaps.full];
   if (velocity > 0.45) {
