@@ -127,6 +127,7 @@ PY
 source "$tmp"
 rm -f "$tmp"
 
+dotnet restore OregonProviderFinder.slnx
 dotnet tool restore
 OPF_OWNER_CONNECTION="$OPF_OWNER_MAIN" dotnet ef database update --project src/Core --startup-project src/Core
 OPF_OWNER_CONNECTION="$OPF_OWNER_TEST" dotnet ef database update --project src/Core --startup-project src/Core
