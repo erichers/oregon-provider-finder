@@ -1,1 +1,1 @@
-﻿Console.WriteLine("Oregon Provider Finder importer");
+Console.WriteLine("Oregon Provider Finder importer");

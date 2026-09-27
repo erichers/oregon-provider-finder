@@ -1,4 +1,4 @@
-﻿namespace OregonProviderFinder.Api.Tests;
+namespace OregonProviderFinder.Api.Tests;
 
 public class UnitTest1
 {

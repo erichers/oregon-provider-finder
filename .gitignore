@@ -15,4 +15,5 @@ appsettings.*.local.json
 tools/capture/output-raw/
 .work/
 .tools/
+.cursor/
 BRIEF.md
