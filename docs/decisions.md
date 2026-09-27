@@ -112,6 +112,10 @@ Eric rejected the split list and map. The search route is now the full window: t
 
 Leaflet and Leaflet.markercluster load as page scripts so they share one `L`. The earlier import failed because the bundler gave the plugin a different Leaflet than the map. Clusters split with the plugin's own animation, and `prefers-reduced-motion: reduce` turns that animation off. CARTO's public raster URL now returns tiles stamped "API KEY REQUIRED", so the basemap is the OpenStreetMap tile server, attributed, with no key. If a tile fails, the markers remain and a line says the tiles did not load.
 
+## 2026-09-27: Search tolerates a typo
+
+A word search still uses the full-text vector, and it also keeps a row when the name is a close trigram match, the city is a close trigram match, the specialty text contains the words, or the ZIP starts with what was typed. The city trigram index is created in SQL because a second index on the same column in the model replaces the btree. When the search has words and no place, the page sorts by relevance. Distance stays the default when a place is set. A credential is shown as its code plus a plain-language label, and the raw taxonomy code stays next to the specialty name.
+
 ## 2026-09-27: Motion is a short rise
 
 Result cards, the page you navigate to, and the panels on a profile rise 8 pixels and fade in over about 200 to 240 milliseconds. The search box does not animate while someone is typing. `prefers-reduced-motion: reduce` sets those animations to none, so the content is in place immediately.
