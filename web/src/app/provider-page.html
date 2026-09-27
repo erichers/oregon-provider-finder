@@ -38,8 +38,20 @@
     <a class="button ghost" [href]="mapsUrl(provider)">Directions</a>
   </div>
   <p>NPI <a [href]="provider.registryUrl">{{ provider.npi }}</a></p>
+  @if (provider.enumerationDate) {
+    <p>NPI enumerated {{ formatDate(provider.enumerationDate) }}. Source: NPPES, data as of {{ formatDate(meta()?.dataAsOf ?? null) }}.</p>
+  }
   @if (provider.registryLastUpdated) {
-    <p>Registry record last updated {{ formatDate(provider.registryLastUpdated) }}.</p>
+    <p>Registry record last updated {{ formatDate(provider.registryLastUpdated) }}. Source: NPPES.</p>
+  }
+  @if (provider.otherLocations?.length) {
+    <h3>Other practice locations</h3>
+    <ul>
+      @for (place of provider.otherLocations; track $index) {
+        <li>{{ streetCase(place.addressLine1) }}, {{ placeCase(place.city) }} {{ place.state }} {{ place.postalCode }}</li>
+      }
+    </ul>
+    <p class="muted">Source: NPPES practice location file, data as of {{ formatDate(meta()?.dataAsOf ?? null) }}.</p>
   }
   @if (meta()?.dataAsOf) {
     <p class="muted">Directory data as of {{ formatDate(meta()!.dataAsOf) }}.</p>

@@ -119,3 +119,11 @@ A word search still uses the full-text vector, and it also keeps a row when the 
 ## 2026-09-27: Motion is a short rise
 
 Result cards, the page you navigate to, and the panels on a profile rise 8 pixels and fade in over about 200 to 240 milliseconds. The search box does not animate while someone is typing. `prefers-reduced-motion: reduce` sets those animations to none, so the content is in place immediately.
+
+## 2026-09-27: Secondary locations, not board status
+
+The NPPES practice location file is already in the September 2026 zip. `import locations` copies rows whose NPI is already in the directory (13,545 rows) into `provider_locations`. The profile lists those addresses and names the file and the NPPES data date. Enumeration date and the registry update date were already stored; the profile now shows both, with NPPES as the source.
+
+Oregon license status, type, and expiration stay off the profile. The Medical Board open data file is aggregate counts. Individual lookup is behind a terms page, and a licensee list is a paid records request. The Board of Nursing sells a mailing list and otherwise takes a records request. Neither is a bulk file or public API this directory can copy. A license number on the profile, when present, is the number the provider typed into NPPES.
+
+The other-organization-name file and the endpoint file stay in the zip and are not imported. The other-name file is a separate national list of organization names and a type code, not a verified affiliation. The endpoint file is electronic endpoints, not practice locations.

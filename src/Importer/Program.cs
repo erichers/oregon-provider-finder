@@ -86,6 +86,19 @@ if (args is ["llm", "probe", ..])
     return await LlmProbe.RunAsync(repo, poison);
 }
 
+if (args is ["import", "locations"])
+{
+    var zipPath = Path.Combine(repo, "data", "downloads", "NPPES_Data_Dissemination_September_2026_V2.zip");
+    if (!File.Exists(zipPath))
+    {
+        Console.Error.WriteLine("The NPPES zip is not in data/downloads.");
+        return 1;
+    }
+
+    await LocationImport.RunAsync(connectionString, zipPath);
+    return 0;
+}
+
 if (args is ["import", "snapshot"])
 {
     await SnapshotStore.ImportAsync(connectionString, repo);
@@ -99,5 +112,5 @@ if (args is ["checksum"])
     return 0;
 }
 
-Console.Error.WriteLine("Commands: import full [--file <zip>] [--download-latest] | import geo | import snapshot | export snapshot | checksum | llm probe [--poison <provider>]");
+Console.Error.WriteLine("Commands: import full [--file <zip>] [--download-latest] | import geo | import locations | import snapshot | export snapshot | checksum | llm probe [--poison <provider>]");
 return 1;

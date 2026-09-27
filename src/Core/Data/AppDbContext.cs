@@ -7,6 +7,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 {
     public DbSet<Provider> Providers => Set<Provider>();
     public DbSet<ProviderTaxonomy> ProviderTaxonomies => Set<ProviderTaxonomy>();
+    public DbSet<ProviderLocation> ProviderLocations => Set<ProviderLocation>();
     public DbSet<Taxonomy> Taxonomies => Set<Taxonomy>();
     public DbSet<ZipCentroid> ZipCentroids => Set<ZipCentroid>();
     public DbSet<City> Cities => Set<City>();
@@ -59,6 +60,16 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.Property(t => t.Code).HasMaxLength(10);
             entity.Property(t => t.LicenseState).HasMaxLength(2);
             entity.HasIndex(t => t.Code);
+        });
+
+        modelBuilder.Entity<ProviderLocation>(entity =>
+        {
+            entity.Property(l => l.Npi).HasMaxLength(10).IsFixedLength();
+            entity.Property(l => l.State).HasMaxLength(40);
+            entity.HasIndex(l => l.Npi);
+            entity.HasOne(l => l.Provider)
+                .WithMany(p => p.Locations)
+                .HasForeignKey(l => l.Npi);
         });
 
         modelBuilder.Entity<Taxonomy>(entity =>

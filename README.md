@@ -17,6 +17,9 @@ I am a licensed counselor in Oregon. I had already built a statewide directory o
 - Seven clinician groups, from the NUCC taxonomy, limited to people with an Oregon practice address and an active NPI.
 - City or ZIP search from Census ZIP centroids. Distance is in statute miles.
 - Care-need presets, credential filters, and a sex filter. The sex field is self-reported.
+- A full-screen map. The list follows the area in view, and a new search flies the map to the results.
+- Search that tolerates a close misspelling of a name or city, and sorts by relevance when no place is set.
+- Other practice locations from the NPPES location file, with the source and the data date on the profile.
 - A map of result counts by ZIP.
 - Plain-words search. The model proposes filters. The server checks them and drops anything the registry cannot answer, including insurance.
 - A crisis line on every page: call or text 988.

@@ -23,6 +23,8 @@ public sealed record MapPoint(string Zip5, double Lat, double Lng, int Count);
 
 public sealed record TaxonomyItem(string Code, string? DisplayName, bool IsPrimary, string? LicenseNumber, string? LicenseState);
 
+public sealed record PracticeLocation(string? AddressLine1, string? AddressLine2, string? City, string? State, string? PostalCode, string? Phone);
+
 public sealed record ProviderDetail(
     string Npi,
     string FullName,
@@ -43,7 +45,8 @@ public sealed record ProviderDetail(
     DateOnly? EnumerationDate,
     DateOnly? RegistryLastUpdated,
     string RegistryUrl,
-    IReadOnlyList<TaxonomyItem> Taxonomies);
+    IReadOnlyList<TaxonomyItem> Taxonomies,
+    IReadOnlyList<PracticeLocation> OtherLocations);
 
 public sealed record InterpretFilters(
     string? Preset,

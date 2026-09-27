@@ -48,6 +48,7 @@ public sealed class ProviderSearch(AppDbContext db)
     {
         var provider = await db.Providers.AsNoTracking()
             .Include(p => p.Taxonomies)
+            .Include(p => p.Locations)
             .FirstOrDefaultAsync(p => p.Npi == npi, cancellationToken);
         if (provider is null)
         {
@@ -85,7 +86,12 @@ public sealed class ProviderSearch(AppDbContext db)
             provider.EnumerationDate,
             provider.RegistryLastUpdated,
             "https://npiregistry.cms.hhs.gov/provider-view/" + provider.Npi.Trim(),
-            taxonomies);
+            taxonomies,
+            provider.Locations
+                .OrderBy(item => item.State)
+                .ThenBy(item => item.City)
+                .Select(item => new PracticeLocation(item.AddressLine1, item.AddressLine2, item.City, item.State, item.PostalCode, item.Phone))
+                .ToList());
     }
 
     private async Task<(IQueryable<Provider> Query, PlaceCenter? Center)> FilterAsync(ProviderCriteria criteria, CancellationToken cancellationToken)

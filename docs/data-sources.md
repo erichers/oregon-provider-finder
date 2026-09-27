@@ -10,7 +10,19 @@ Local file: `data/downloads/NPPES_Data_Dissemination_September_2026_V2.zip` (git
 
 Zip entry used: `npidata_pfile_20050523-20260913.csv` (about 11.7 GB uncompressed, 330 columns). The name's end date is 2026-09-13.
 
-Also in the zip, and not imported: `npidata_pfile_20050523-20260913_fileheader.csv`, `pl_pfile_20050523-20260913.csv` (other practice locations), `endpoint_pfile_20050523-20260913.csv`, `othername_pfile_20050523-20260913.csv`, plus the readme and code-values PDF.
+`pl_pfile_20050523-20260913.csv` is imported for NPIs already in the directory. Those rows are secondary practice locations. The profile names that file and the NPPES data date.
+
+Not imported: `npidata_pfile_20050523-20260913_fileheader.csv`, `endpoint_pfile_20050523-20260913.csv`, `othername_pfile_20050523-20260913.csv` (other organization names, a separate national list), plus the readme and code-values PDF.
+
+## Oregon licensing boards
+
+Checked 2026-09-27. License status, type, and expiration are not loaded.
+
+The Oregon Medical Board publishes license-type counts on data.oregon.gov (dataset `ifun-evx5`, updated 2026-09-22). That file is aggregate counts, not a person. Individual lookup is the License Verification Service, which requires agreeing to its terms of use at https://omb.oregon.gov/clients/ormb/public/TermsOfService.aspx. A list of licensees is a public records request with a fee (https://www.oregon.gov/omb/board/about/pages/public-information.aspx). There is no bulk file or public API whose terms allow this directory to copy license status.
+
+The Oregon State Board of Nursing sells mailing lists of people who agreed to be listed (https://osbn.oregon.gov/OSBNMailingList). Other records are a public records request (https://www.oregon.gov/osbn/pages/records-request.aspx). That is not a free bulk file this app can ship.
+
+The license number on a profile, when present, is the number the provider typed into NPPES. It is not a board status.
 
 The data CSV has a header row. Names are quoted in the file. Map by header name. The columns this app reads:
 

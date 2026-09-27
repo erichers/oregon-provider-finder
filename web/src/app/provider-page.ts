@@ -18,6 +18,7 @@ export class ProviderPage {
   readonly placeCase = placeCase;
   readonly phoneText = phoneText;
   readonly credentialLabel = credentialLabel;
+  readonly streetCase = streetCase;
   readonly formatDate = formatDate;
 
   constructor() {

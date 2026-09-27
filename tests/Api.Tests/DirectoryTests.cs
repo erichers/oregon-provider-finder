@@ -146,6 +146,14 @@ public sealed class DirectoryTests(ApiFactory factory) : IClassFixture<ApiFactor
         Assert.NotEmpty(page2);
     }
 
+    [Fact]
+    public async Task Detail_includes_other_practice_locations_from_nppes()
+    {
+        var body = await Read("/api/providers/1083617658");
+        Assert.True(body.GetProperty("otherLocations").GetArrayLength() > 0);
+        Assert.False(string.IsNullOrWhiteSpace(body.GetProperty("enumerationDate").GetString()));
+    }
+
     private async Task<JsonElement> Read(string path)
     {
         var response = await factory.CreateClient().GetAsync(path);

@@ -7,8 +7,9 @@ Ran on 2026-09-27 from `data/downloads/NPPES_Data_Dissemination_September_2026_V
 - `import geo` loads `data/geo/oregon-zcta.csv` into `zip_centroids`.
 - `import taxonomy` loads `data/taxonomy/nucc-subset.csv` into `taxonomies`.
 - `import full --file <zip>` loads those reference tables, keeps Oregon individual clinicians who have a group taxonomy, and swaps the new rows in during one transaction. `--download-latest` fetches the current V.2 zip from the CMS page when a local file is not the one you want.
-- `export snapshot` writes `data/snapshot/providers.csv.gz`, `provider_taxonomies.csv.gz`, and `meta.json`.
+- `export snapshot` writes `data/snapshot/providers.csv.gz`, `provider_taxonomies.csv.gz`, `provider_locations.csv.gz`, and `meta.json`.
 - `import snapshot` copies those files back, rebuilds `cities`, and writes an `import_runs` row of kind `snapshot`.
+- `import locations` reads the NPPES practice location file for NPIs already in the directory. Run it before `export snapshot`.
 - `checksum` prints two md5 digests, providers then taxonomy links, so a reload can be compared with the source database.
 
 `import_runs.started_at` and `finished_at` come from PostgreSQL `NOW()`.
