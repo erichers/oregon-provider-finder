@@ -1,4 +1,5 @@
 import { Component, DestroyRef, ElementRef, effect, inject, input, output, signal, viewChild } from '@angular/core';
+import * as L from 'leaflet';
 import type { LayerGroup, Map as LeafletMap, Marker } from 'leaflet';
 import { phoneText, placeCase, streetCase } from './format';
 import { PlaceGroup, clusterPlaces, escapeHtml, MapPlace, oregonView, plottable, popupLines } from './map-state';
@@ -7,7 +8,7 @@ import { PlaceGroup, clusterPlaces, escapeHtml, MapPlace, oregonView, plottable,
   selector: 'app-result-map',
   template: `
     <div class="map-wrap">
-      <div #host class="map-frame" role="region" aria-label="Providers on a map"></div>
+      <div #host class="map-frame" role="region" aria-label="Providers on a map" [attr.data-count]="markerCount()"></div>
       @if (loading() && plottable(places()).length === 0) {
         <p class="map-status">Loading locations</p>
       } @else if (!loading() && plottable(places()).length === 0) {
@@ -25,6 +26,7 @@ export class ResultMap {
   readonly loading = input(false);
   readonly selectPlace = output<string>();
   readonly tilesFailed = signal(false);
+  readonly markerCount = signal(0);
   readonly plottable = plottable;
 
   private readonly host = viewChild<ElementRef<HTMLElement>>('host');
@@ -42,7 +44,7 @@ export class ResultMap {
       if (!el) {
         return;
       }
-      void this.draw(el, places);
+      this.draw(el, places);
     });
     effect(() => {
       const npi = this.selected();
@@ -53,8 +55,7 @@ export class ResultMap {
     destroy.onDestroy(() => this.map?.remove());
   }
 
-  private async draw(el: HTMLElement, places: MapPlace[]) {
-    const L = await import('leaflet');
+  private draw(el: HTMLElement, places: MapPlace[]) {
     this.leaflet = L;
     if (!this.map) {
       const map = L.map(el, { scrollWheelZoom: false }).setView([oregonView.lat, oregonView.lng], oregonView.zoom);
@@ -88,6 +89,7 @@ export class ResultMap {
     } else {
       map.setView([oregonView.lat, oregonView.lng], oregonView.zoom);
     }
+    this.markerCount.set(this.markers.size);
     this.applySelection(L, this.selected());
     setTimeout(() => map.invalidateSize(), 0);
   }

@@ -58,14 +58,18 @@ test('a marker selects its card and a card selects its marker', async ({ page })
     await route.fulfill({ json: {} });
   });
 
+  const logs: string[] = [];
+  page.on('pageerror', (err) => logs.push(err.message));
   await page.goto('/?q=grant');
-  const cluster = page.locator('.marker-cluster').first();
-  const pin = page.locator('.pin').first();
-  await expect(cluster.or(pin)).toBeVisible();
-  if (await cluster.isVisible()) {
-    await cluster.click();
+  await expect(page.getByRole('link', { name: /Grant/ })).toBeVisible();
+  if (await page.locator('.map-frame').count() === 0) {
+    await page.getByRole('button', { name: 'Map' }).click();
   }
+  await expect(page.locator('.map-frame')).toBeVisible();
+  await expect(page.locator('.map-frame')).toHaveAttribute('data-count', '2', { timeout: 15000 });
+  const pin = page.locator('.pin').first();
   await expect(pin).toBeVisible();
+  expect(logs).toEqual([]);
   await pin.click();
   await expect(page.locator('.map-popup a')).toHaveText('Profile');
   const selected = await page.locator('a.result.selected').getAttribute('id');
