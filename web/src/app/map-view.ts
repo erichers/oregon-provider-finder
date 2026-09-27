@@ -39,6 +39,7 @@ export class ResultMap {
   readonly reveal = input(0);
   readonly wide = input(false);
   readonly selectPlace = output<string>();
+  readonly nodeSelect = output<{ npis: string[]; teaser: boolean }>();
   readonly highlightPlace = output<string>();
   readonly boundsChange = output<MapBounds>();
   readonly tilesFailed = signal(false);
@@ -48,6 +49,7 @@ export class ResultMap {
   private readonly host = viewChild<ElementRef<HTMLElement>>('host');
   private map: LeafletMap | null = null;
   private cluster: MarkerClusterGroup | null = null;
+  private readonly byMarker = new Map<unknown, string>();
   private markers = new Map<string, Marker>();
   private leaflet: LeafletApi | null = null;
   private appliedFit = 0;
@@ -124,7 +126,8 @@ export class ResultMap {
       this.cluster = L.markerClusterGroup({
         showCoverageOnHover: false,
         maxClusterRadius: 52,
-        spiderfyOnMaxZoom: true,
+        zoomToBoundsOnClick: false,
+        spiderfyOnMaxZoom: false,
         animate: !reduce,
         animateAddingMarkers: !reduce,
         iconCreateFunction: (cluster) => L.divIcon({
@@ -133,6 +136,14 @@ export class ResultMap {
           iconSize: [44, 44],
           iconAnchor: [22, 22],
         }),
+      });
+      this.cluster.on('clusterclick', (event: unknown) => {
+        const layer = (event as { layer?: { getAllChildMarkers?: () => unknown[] } }).layer;
+        const children = layer?.getAllChildMarkers?.() ?? [];
+        const npis = children.map((marker) => this.byMarker.get(marker)).filter((npi): npi is string => !!npi);
+        if (npis.length) {
+          this.nodeSelect.emit({ npis, teaser: false });
+        }
       });
       this.cluster.addTo(map);
       map.on('moveend', () => {
@@ -151,6 +162,7 @@ export class ResultMap {
     }
     cluster.clearLayers();
     this.markers.clear();
+    this.byMarker.clear();
     for (const place of plottable(places)) {
       const marker = L.marker([place.lat, place.lng], {
         icon: this.pin(L, place.npi === this.selected()),
@@ -158,7 +170,8 @@ export class ResultMap {
         title: placeCase(place.fullName),
       });
       marker.bindPopup(this.popup(place));
-      marker.on('click', () => this.selectPlace.emit(place.npi));
+      this.byMarker.set(marker, place.npi);
+      marker.on('click', () => this.nodeSelect.emit({ npis: [place.npi], teaser: true }));
       marker.on('mouseover', () => this.highlightPlace.emit(place.npi));
       this.markers.set(place.npi, marker);
       cluster.addLayer(marker);

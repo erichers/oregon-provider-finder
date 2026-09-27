@@ -1,4 +1,4 @@
-import { clusterPlaces, escapeHtml, oregonView, plottable, popupLines, MapPlace } from './map-state';
+import { clusterPlaces, escapeHtml, nodeHeading, oregonView, plottable, popupLines, MapPlace } from './map-state';
 
 const salem: MapPlace = {
   npi: '1548266448',
@@ -24,6 +24,13 @@ describe('map state', () => {
     expect(oregonView.zoom).toBe(6);
     expect(oregonView.lat).toBeGreaterThan(42);
     expect(oregonView.lat).toBeLessThan(46);
+  });
+
+  it('names a node from the most common city', () => {
+    expect(nodeHeading([salem, { ...salem, npi: '1003827965' }])).toBe('2 providers near Salem');
+    expect(nodeHeading([salem])).toBe('1 provider near Salem');
+    expect(nodeHeading([{ city: 'PORTLAND' }, { city: 'PORTLAND' }, { city: 'SALEM' }])).toBe('3 providers near Portland');
+    expect(nodeHeading([{ city: null }])).toBe('1 provider');
   });
 
   it('groups providers that share a ZIP center', () => {

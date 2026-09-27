@@ -7,6 +7,7 @@
     [reveal]="reveal()"
     [wide]="wide()"
     (selectPlace)="choose($event)"
+    (nodeSelect)="onNode($event)"
     (boundsChange)="onBounds($event)"
     (highlightPlace)="highlight($event)" />
 
@@ -133,30 +134,39 @@
         </button>
       </div>
       <div class="drawer-scroll" id="results" (scroll)="onListScroll($event)">
-        @if (picked(); as person) {
-          <article class="detail-card">
-            <strong>{{ placeCase(person.fullName) }}</strong>
+        @if (nodeProviders()) {
+          <button type="button" class="chip node-clear" aria-label="Clear map selection" (click)="clearNode()">
+            <span>Clear map selection</span>
+            <svg class="chip-x" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M7 7l10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+            </svg>
+          </button>
+        }
+        @if (teaserPerson(); as person) {
+          <article class="teaser" [attr.role]="wide() ? 'dialog' : 'region'" aria-labelledby="teaser-title">
+            <div class="teaser-top">
+              <h2 id="teaser-title" tabindex="-1">{{ placeCase(person.fullName) }}</h2>
+              <button type="button" id="teaser-close" aria-label="Close provider preview" (click)="closeTeaser()">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M7 7l10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+                </svg>
+              </button>
+            </div>
             @if (person.credentialText) {
-              <span>{{ credentialLabel(person.credentialText) }}</span>
+              <p>{{ credentialLabel(person.credentialText) }}</p>
             }
             @if (person.primarySpecialty) {
-              <span class="result-role">{{ person.primarySpecialty }}</span>
+              <p>{{ person.primarySpecialty }}</p>
             }
-            <span class="result-place">{{ streetCase(person.addressLine1) }} {{ placeCase(person.city) }} {{ person.zip5 }}</span>
-            @if (person.phone) {
-              <a [href]="'tel:' + person.phone">{{ phoneText(person.phone) }}</a>
-            }
-            <div class="row-actions">
-              <a class="button" [routerLink]="['/provider', person.npi]">Full profile</a>
-              <button type="button" class="ghost" (click)="picked.set(null)">Close</button>
-            </div>
+            <p>{{ placeCase(person.city) }}@if (person.distanceMiles !== null) { · {{ distanceText(person.distanceMiles) }} }</p>
+            <a class="button" [routerLink]="['/provider', person.npi]">View full profile</a>
           </article>
         }
         @if (loading()) {
           <div class="skeleton"></div>
           <div class="skeleton"></div>
           <div class="skeleton"></div>
-        } @else if (total() === 0) {
+        } @else if (listed().length === 0) {
           <p>{{ active() ? emptyLine() : 'No providers in this view. Zoom out or clear a filter.' }}</p>
           <div class="row-actions">
             @if (filters().near && filters().radius < 50) {
@@ -167,7 +177,7 @@
             }
           </div>
         } @else {
-          @for (item of items(); track item.npi) {
+          @for (item of listed(); track item.npi) {
             <article class="result" [id]="'result-' + item.npi" [class.selected]="selectedNpi() === item.npi">
               <button type="button" class="result-hit" (click)="choose(item.npi)" (pointerenter)="highlight(item.npi)" (focus)="highlight(item.npi)">
                 <strong>{{ placeCase(item.fullName) }}</strong>
@@ -181,7 +191,7 @@
               </button>
             </article>
           }
-          @if (items().length < total()) {
+          @if (!nodeProviders() && items().length < total()) {
             <button type="button" (click)="showMore()" [disabled]="loadingMore()">{{ loadingMore() ? 'Loading' : 'Load more' }}</button>
           }
         }

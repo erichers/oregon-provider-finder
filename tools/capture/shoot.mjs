@@ -90,6 +90,59 @@ await phone.waitForTimeout(800);
 await framed(phone, "results-phone", "localhost:4200/?groups=physician&near=Portland&radius=25", 390);
 await framed(phone, "map-phone", "localhost:4200/?groups=physician&near=Portland&radius=25", 390);
 
+async function showNode(page, phone) {
+  if (phone) {
+    const tall = await page.locator(".drawer-sheet").evaluate((el) => el.getBoundingClientRect().height > 200);
+    if (tall) {
+      await page.locator(".drawer-toggle").click();
+      await page.waitForFunction(() => {
+        const sheet = document.querySelector(".drawer-sheet");
+        return sheet && sheet.getBoundingClientRect().height < 120;
+      });
+    }
+  }
+  const point = await page.evaluate(() => {
+    const pins = [...document.querySelectorAll(".cluster-pin, .pin")];
+    for (const pin of pins) {
+      const rect = pin.getBoundingClientRect();
+      if (rect.width < 8 || rect.height < 8) continue;
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      const hit = document.elementFromPoint(x, y);
+      if (hit && (hit === pin || pin.contains(hit) || hit.closest(".pin-wrap") === pin.closest(".pin-wrap"))) {
+        return { x, y };
+      }
+    }
+    return null;
+  });
+  if (!point) {
+    throw new Error("No visible map node to photograph");
+  }
+  await page.mouse.click(point.x, point.y);
+  await page.waitForSelector(".node-clear", { timeout: 8000 });
+  if (phone) {
+    await page.waitForFunction(() => {
+      const sheet = document.querySelector(".drawer-sheet");
+      return sheet && sheet.getBoundingClientRect().height > 320;
+    });
+    await page.waitForTimeout(250);
+  }
+}
+await showNode(desktop, false);
+await framed(desktop, "node-desktop", "localhost:4200/?groups=physician&near=Portland&radius=25", 1440);
+await desktop.locator(".result-hit").first().click();
+await desktop.waitForSelector(".teaser");
+await framed(desktop, "teaser-desktop", "localhost:4200/?groups=physician&near=Portland&radius=25", 1440);
+await showNode(phone, true);
+await framed(phone, "node-phone", "localhost:4200/?groups=physician&near=Portland&radius=25", 390);
+await phone.locator(".result-hit").first().click();
+await phone.waitForSelector(".teaser");
+await phone.locator(".drawer-toggle").focus();
+await phone.keyboard.press("ArrowUp");
+await phone.waitForTimeout(400);
+await phone.locator(".drawer-toggle").evaluate((node) => node.blur());
+await framed(phone, "teaser-phone", "localhost:4200/?groups=physician&near=Portland&radius=25", 390);
+
 await desktop.goto(base + "/", { waitUntil: "domcontentloaded" });
 await desktop.locator("#words").fill("nurse practitioner in Salem within 10 miles");
 await desktop.getByRole("button", { name: "Search" }).click();

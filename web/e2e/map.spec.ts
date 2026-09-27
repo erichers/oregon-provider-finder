@@ -94,16 +94,15 @@ test('a marker selects its card and a card selects its marker', async ({ page })
   const pin = page.locator('.pin').first();
   await expect(pin).toBeVisible();
   expect(logs).toEqual([]);
-  await pin.click();
-  await expect(page.locator('.map-popup a')).toHaveText('Profile');
-  const selected = await page.locator('article.result.selected').getAttribute('id');
   const cards = ['result-1548266448', 'result-1003827965'];
-  expect(cards).toContain(selected);
-  const other = cards.find((id) => id !== selected);
-  expect(other).toBeTruthy();
-  await page.locator('#' + other).hover();
-  await expect(page.locator('#' + other)).toHaveClass(/selected/);
+  await page.locator('#result-1003827965').hover();
+  await expect(page.locator('#result-1003827965')).toHaveClass(/selected/);
   await expect(page.locator('.pin-wrap.selected')).toHaveCount(1);
+  await pin.click();
+  await expect(page.locator('.teaser')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'View full profile' })).toBeVisible();
+  const selected = await page.locator('article.result.selected').getAttribute('id');
+  expect(cards).toContain(selected);
 });
 
 test('moving the map searches the visible area', async ({ page }) => {

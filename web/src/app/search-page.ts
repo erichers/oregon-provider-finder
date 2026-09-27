@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, afterNextRender, computed, effect, inject, signal } from '@angular/core';
+import { Component, DestroyRef, HostListener, afterNextRender, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, convertToParamMap } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
@@ -9,6 +9,7 @@ import { Facets, FinderApi, LocationHit, MapBounds, ProviderDetail, ProviderSumm
 import { chevronDir, nextSnap, phoneKey, phoneTap, rowFade, sheetExpanded, sheetLabel, snapHeights, toggleLabel } from './drawer-state';
 import { credentialLabel, distanceText, placeCase, phoneText, streetCase } from './format';
 import { ResultMap } from './map-view';
+import { nodeHeading } from './map-state';
 import { SearchQuery, isActive, readQuery, toParams } from './query';
 
 @Component({
@@ -76,6 +77,9 @@ export class SearchPage {
   readonly nearDraft = signal('');
   readonly selectedNpi = signal<string | null>(null);
   readonly picked = signal<ProviderDetail | null>(null);
+  readonly nodeProviders = signal<ProviderSummary[] | null>(null);
+  readonly teaserPerson = signal<ProviderSummary | null>(null);
+  private teaserFrom: 'card' | 'marker' | null = null;
   readonly fitToken = signal(0);
   readonly reveal = signal(0);
   readonly bounds = signal<MapBounds | null>(null);
@@ -206,6 +210,8 @@ export class SearchPage {
         this.nearDraft.set(query.near ?? '');
         this.page.set(1);
         this.flyPending = isActive(query);
+        this.nodeProviders.set(null);
+        this.teaserPerson.set(null);
         this.requests.next({ query, bounds: null, page: 1, reason: 'filter' });
         if (isActive(query)) {
           this.api.facets(query.groups).subscribe((facets) => this.facets.set(facets));
@@ -228,21 +234,100 @@ export class SearchPage {
 
   onBounds(box: MapBounds) {
     this.bounds.set(box);
-    if (this.flyPending) {
+    if (this.flyPending || this.nodeProviders()) {
       return;
     }
     this.requests.next({ query: this.filters(), bounds: box, page: 1, reason: 'bounds' });
   }
 
-  choose(npi: string) {
+  onNode(node: { npis: string[]; teaser: boolean }) {
+    const wanted = new Set(node.npis);
+    const list = this.items().filter((item) => wanted.has(item.npi));
+    if (!list.length) {
+      return;
+    }
+    this.nodeProviders.set(list);
+    this.holdDrawer();
+    if (node.teaser) {
+      this.openTeaser(list[0].npi, 'marker');
+    }
+  }
+
+  listed(): ProviderSummary[] {
+    return this.nodeProviders() ?? this.items();
+  }
+
+  clearNode() {
+    this.nodeProviders.set(null);
+    this.closeTeaser();
+    const box = this.bounds();
+    if (box) {
+      this.requests.next({ query: this.filters(), bounds: box, page: 1, reason: 'bounds' });
+    }
+  }
+
+  openTeaser(npi: string, from: 'card' | 'marker') {
+    const person = (this.nodeProviders() ?? this.items()).find((item) => item.npi === npi);
+    if (!person) {
+      return;
+    }
+    this.teaserPerson.set(person);
+    this.teaserFrom = from;
     this.selectedNpi.set(npi);
     this.reveal.update((n) => n + 1);
-    this.api.detail(npi).subscribe((detail) => {
-      if (this.selectedNpi() === npi) {
-        this.picked.set(detail);
+    this.holdDrawer();
+    queueMicrotask(() => document.getElementById('teaser-close')?.focus());
+  }
+
+  closeTeaser() {
+    if (!this.teaserPerson()) {
+      return;
+    }
+    const from = this.teaserFrom;
+    const npi = this.teaserPerson()?.npi;
+    this.teaserPerson.set(null);
+    this.teaserFrom = null;
+    queueMicrotask(() => {
+      if (!npi) {
+        return;
       }
+      const target = from === 'marker'
+        ? document.querySelector<HTMLElement>('.pin-wrap.selected')
+        : document.querySelector<HTMLElement>('#result-' + npi + ' .result-hit');
+      target?.focus();
     });
-    queueMicrotask(() => document.getElementById('result-' + npi)?.scrollIntoView({ block: 'nearest' }));
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape() {
+    this.closeTeaser();
+  }
+
+  @HostListener('document:pointerdown', ['$event'])
+  onOutside(event: PointerEvent) {
+    if (!this.teaserPerson()) {
+      return;
+    }
+    const node = event.target as HTMLElement | null;
+    if (node?.closest('.teaser, .result-hit, .pin-wrap, .cluster-pin')) {
+      return;
+    }
+    this.closeTeaser();
+  }
+
+  private holdDrawer() {
+    this.drawerClosed.set(false);
+    if (this.wide()) {
+      return;
+    }
+    const snaps = this.snaps();
+    if (this.sheetHeight() < snaps.half - 8) {
+      this.sheetHeight.set(snaps.half);
+    }
+  }
+
+  choose(npi: string) {
+    this.openTeaser(npi, 'card');
   }
 
   highlight(npi: string) {
@@ -250,6 +335,10 @@ export class SearchPage {
   }
 
   labelText(): string {
+    const node = this.nodeProviders();
+    if (node) {
+      return nodeHeading(node);
+    }
     return sheetLabel(this.loading(), this.total());
   }
 

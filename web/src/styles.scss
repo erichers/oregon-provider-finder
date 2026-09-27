@@ -23,7 +23,8 @@
   --radius-card: 0.85rem;
   --shadow-bar: 0 1px 0 rgb(31 36 33 / 8%);
   --motion: 220ms;
-  --glass: rgba(255, 255, 255, 0.66);
+  --glass: rgba(255, 255, 255, 0.84);
+  --glass-card: rgba(255, 255, 255, 0.9);
   --glass-border: rgba(255, 255, 255, 0.4);
   --glass-shadow: 0 8px 28px rgba(31, 36, 33, 0.12);
   --glass-blur: blur(12px) saturate(160%);
@@ -1405,4 +1406,170 @@ button.filter-toggle {
 .locate svg {
   width: 22px;
   height: 22px;
+}
+
+.drawer,
+.drawer-sheet {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.drawer-sheet {
+  pointer-events: none;
+  background: transparent;
+}
+
+.drawer-scroll {
+  pointer-events: auto;
+  background: transparent;
+}
+
+.float-search,
+.search-bar,
+.filter-strip,
+.filter-strip button,
+.filter-panel,
+.drawer-head,
+.result,
+.result-hit,
+.teaser,
+.node-clear,
+.drawer-scroll button,
+.drawer-scroll a,
+.drawer-scroll p,
+.skeleton,
+.note {
+  pointer-events: auto;
+}
+
+.drawer-head {
+  margin: 0 1rem 12px;
+  border-radius: var(--radius-pill);
+  background: var(--glass-card);
+}
+
+.result {
+  margin: 0 0 12px;
+}
+
+.result-hit,
+.teaser {
+  background: var(--glass-card);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+.teaser {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin: 0 0 12px;
+  padding: 16px;
+  border-radius: var(--radius-card);
+  color: var(--ink);
+}
+
+.teaser h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: var(--fir);
+}
+
+.teaser p {
+  margin: 0;
+}
+
+.teaser-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+#teaser-close {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--ink);
+}
+
+#teaser-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+.node-clear {
+  margin: 0 0 12px;
+}
+
+@media (min-width: 1024px) {
+  .drawer {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .drawer-sheet {
+    overflow: visible;
+    background: transparent;
+    border: 0;
+  }
+
+  .teaser {
+    position: fixed;
+    top: 6.5rem;
+    left: 27rem;
+    width: 22rem;
+    z-index: 8;
+    margin: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .teaser {
+    animation: rise 180ms ease;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .teaser {
+    animation: none;
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .result-hit,
+  .teaser,
+  .drawer-head {
+    background: var(--glass-solid);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .result-hit,
+  .teaser,
+  .drawer-head {
+    background: var(--glass-solid);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
