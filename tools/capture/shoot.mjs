@@ -77,11 +77,15 @@ await framed(desktop, "results-desktop", "localhost:4200/?groups=physician&near=
 await framed(desktop, "map-desktop", "localhost:4200/?groups=physician&near=Portland&radius=25", 1440);
 
 await phone.goto(base + resultsUrl, { waitUntil: "domcontentloaded" });
-await phone.locator(".drawer-toggle").click();
+await phone.locator(".drawer-toggle").focus();
+await phone.keyboard.press("ArrowUp");
+await phone.keyboard.press("ArrowUp");
+await phone.waitForTimeout(300);
 await phone.waitForSelector(".result");
 await phone.waitForSelector(".map-frame.leaflet-container");
 await phone.waitForSelector(".drawer-sheet");
 await phone.locator("#results").evaluate((node) => node.scrollIntoView({ block: "start" }));
+await phone.locator(".drawer-toggle").evaluate((node) => node.blur());
 await phone.waitForTimeout(800);
 await framed(phone, "results-phone", "localhost:4200/?groups=physician&near=Portland&radius=25", 390);
 await framed(phone, "map-phone", "localhost:4200/?groups=physician&near=Portland&radius=25", 390);

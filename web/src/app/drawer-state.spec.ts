@@ -1,4 +1,4 @@
-import { chevronDir, nextSnap, phoneKey, phoneTap, sheetExpanded, sheetLabel, snapHeights, toggleLabel } from './drawer-state';
+import { chevronDir, nextSnap, phoneKey, phoneTap, rowFade, sheetExpanded, sheetLabel, snapHeights, toggleLabel } from './drawer-state';
 
 describe('drawer snaps', () => {
   const snaps = snapHeights(844);
@@ -28,6 +28,20 @@ describe('drawer snaps', () => {
     expect(sheetExpanded(true, false, 64, 64)).toBe(true);
     expect(sheetExpanded(false, false, 64, 64)).toBe(false);
     expect(sheetExpanded(false, false, 388, 64)).toBe(true);
+  });
+
+  it('stops the full sheet below a taller top bar', () => {
+    const tight = snapHeights(844, 240);
+    expect(tight.full).toBe(604);
+    expect(tight.half).toBeLessThan(tight.full);
+    expect(tight.peek).toBe(64);
+  });
+
+  it('fades a sideways row only where more pills are hidden', () => {
+    expect(rowFade(0, 300, 300)).toBe('none');
+    expect(rowFade(0, 300, 800)).toBe('right');
+    expect(rowFade(200, 300, 800)).toBe('both');
+    expect(rowFade(500, 300, 800)).toBe('left');
   });
 
   it('tapping an open phone sheet returns to the peek', () => {

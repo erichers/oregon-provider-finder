@@ -11,7 +11,12 @@ type LeafletApi = typeof import('leaflet');
   template: `
     <div class="map-wrap map-stage">
       <div #host class="map-frame" role="region" aria-label="Providers on a map" [attr.data-count]="markerCount()"></div>
-      <button type="button" class="locate" (click)="locate()">Your location</button>
+      <button type="button" class="locate" aria-label="Your location" (click)="locate()">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="3.25" fill="none" stroke="currentColor" stroke-width="1.75" />
+          <path d="M12 3.5v3.2M12 17.3v3.2M3.5 12h3.2M17.3 12h3.2" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+        </svg>
+      </button>
       @if (loading() && markerCount() === 0) {
         <p class="map-status">Loading locations</p>
       } @else if (!loading() && places().length > 0 && markerCount() === 0) {

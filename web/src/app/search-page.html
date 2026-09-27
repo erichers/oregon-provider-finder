@@ -1,4 +1,4 @@
-<div class="map-root" [style.--sheet.px]="sheetHeight()">
+<div class="map-root" [class.zoom-quiet]="zoomQuiet()" [style.--sheet.px]="sheetHeight()">
   <app-result-map
     [places]="items()"
     [selected]="selectedNpi()"
@@ -18,7 +18,7 @@
         <button type="submit" [disabled]="interpreting()">{{ interpreting() ? 'Searching' : 'Search' }}</button>
       </form>
 
-      <div class="filter-strip" role="group" aria-label="Filters and care needs">
+      <div class="filter-strip" role="group" aria-label="Filters and care needs" [attr.data-fade]="stripFade()" (scroll)="onStripScroll($event)">
         <button type="button" class="filter-toggle" [attr.aria-expanded]="filtersOpen()" [attr.aria-label]="filtersAria()" aria-controls="filter-panel" (click)="filtersOpen.update((open) => !open)">
           <svg class="filter-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path d="M4 6h16M7 12h10M10 18h4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />

@@ -4,12 +4,32 @@ export interface SnapHeights {
   full: number;
 }
 
-export function snapHeights(viewport: number): SnapHeights {
-  return {
-    peek: 64,
-    half: Math.round(viewport * 0.46),
-    full: Math.max(280, viewport - 132),
-  };
+export function snapHeights(viewport: number, reserve = 132): SnapHeights {
+  const peek = 64;
+  const full = Math.max(280, viewport - reserve);
+  let half = Math.round(viewport * 0.46);
+  if (half > full - 48) {
+    half = Math.max(peek + 48, Math.round((peek + full) / 2));
+  }
+  return { peek, half, full };
+}
+
+export function rowFade(scrollLeft: number, clientWidth: number, scrollWidth: number): 'none' | 'left' | 'right' | 'both' {
+  if (scrollWidth - clientWidth <= 1) {
+    return 'none';
+  }
+  const left = scrollLeft > 2;
+  const right = scrollLeft + clientWidth < scrollWidth - 2;
+  if (left && right) {
+    return 'both';
+  }
+  if (left) {
+    return 'left';
+  }
+  if (right) {
+    return 'right';
+  }
+  return 'none';
 }
 
 export function sheetLabel(loading: boolean, total: number): string {

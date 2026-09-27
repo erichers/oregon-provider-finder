@@ -1,12 +1,12 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, afterNextRender, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, convertToParamMap } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { catchError, debounceTime, of, Subject, switchMap } from 'rxjs';
 import { GROUPS, PRESETS, groupLabel } from './catalog';
 import { Facets, FinderApi, LocationHit, MapBounds, ProviderDetail, ProviderSummary, UnderstoodItem } from './finder-api';
-import { chevronDir, nextSnap, phoneKey, phoneTap, sheetExpanded, sheetLabel, snapHeights, toggleLabel } from './drawer-state';
+import { chevronDir, nextSnap, phoneKey, phoneTap, rowFade, sheetExpanded, sheetLabel, snapHeights, toggleLabel } from './drawer-state';
 import { credentialLabel, distanceText, placeCase, phoneText, streetCase } from './format';
 import { ResultMap } from './map-view';
 import { SearchQuery, isActive, readQuery, toParams } from './query';
@@ -85,6 +85,9 @@ export class SearchPage {
   readonly dragging = signal(false);
   readonly listScrolled = signal(false);
   readonly wide = signal(false);
+  readonly stripFade = signal<'none' | 'left' | 'right' | 'both'>('none');
+  readonly zoomQuiet = signal(false);
+  private readonly chromeReserve = signal(132);
   readonly page = signal(1);
   readonly active = computed(() => isActive(this.filters()));
   readonly placeCase = placeCase;
@@ -99,12 +102,57 @@ export class SearchPage {
     this.wide.set(media.matches);
     const onChange = () => this.wide.set(media.matches);
     media.addEventListener('change', onChange);
-    inject(DestroyRef).onDestroy(() => {
+    const destroyRef = inject(DestroyRef);
+    destroyRef.onDestroy(() => {
       media.removeEventListener('change', onChange);
       clearTimeout(this.nearTimer);
     });
 
-    this.sheetHeight.set(snapHeights(window.innerHeight).peek);
+    this.sheetHeight.set(this.snaps().peek);
+    effect(() => {
+      const height = this.sheetHeight();
+      const wide = this.wide();
+      const reserve = this.chromeReserve();
+      if (wide) {
+        this.zoomQuiet.set(false);
+        return;
+      }
+      const snaps = snapHeights(window.innerHeight, reserve);
+      const stripBottom = reserve - 8;
+      const zoomTop = window.innerHeight - height - 12 - 88;
+      this.zoomQuiet.set(height > snaps.half + 8 || zoomTop < stripBottom + 8);
+    });
+    afterNextRender(() => {
+      this.syncChrome();
+      const strip = document.querySelector('.filter-strip');
+      const watched = [strip, document.querySelector('.float-search'), document.querySelector('.mast')].filter((node): node is Element => !!node);
+      const observer = new ResizeObserver(() => this.syncChrome());
+      for (const node of watched) {
+        observer.observe(node);
+      }
+      const watchKids = () => {
+        if (!strip) {
+          return;
+        }
+        for (const child of strip.children) {
+          observer.observe(child);
+        }
+      };
+      watchKids();
+      const mutations = new MutationObserver(() => {
+        watchKids();
+        this.syncChrome();
+      });
+      if (strip) {
+        mutations.observe(strip, { childList: true });
+      }
+      window.addEventListener('resize', this.syncChrome);
+      destroyRef.onDestroy(() => {
+        observer.disconnect();
+        mutations.disconnect();
+        window.removeEventListener('resize', this.syncChrome);
+      });
+    });
 
     this.requests.pipe(
       debounceTime(260),
@@ -222,8 +270,31 @@ export class SearchPage {
     this.listScrolled.set((event.target as HTMLElement).scrollTop > 8);
   }
 
+  onStripScroll(event: Event) {
+    const el = event.target as HTMLElement;
+    this.stripFade.set(rowFade(el.scrollLeft, el.clientWidth, el.scrollWidth));
+  }
+
+  snaps() {
+    return snapHeights(window.innerHeight, this.wide() ? 132 : this.chromeReserve());
+  }
+
+  private readonly syncChrome = () => {
+    const strip = document.querySelector<HTMLElement>('.filter-strip');
+    if (strip) {
+      this.stripFade.set(rowFade(strip.scrollLeft, strip.clientWidth, strip.scrollWidth));
+      if (!this.wide()) {
+        this.chromeReserve.set(Math.ceil(strip.getBoundingClientRect().bottom + 8));
+        const snaps = this.snaps();
+        if (this.sheetHeight() > snaps.full) {
+          this.sheetHeight.set(snaps.full);
+        }
+      }
+    }
+  };
+
   expanded(): boolean {
-    return sheetExpanded(this.wide(), this.drawerClosed(), this.sheetHeight(), snapHeights(window.innerHeight).peek);
+    return sheetExpanded(this.wide(), this.drawerClosed(), this.sheetHeight(), this.snaps().peek);
   }
 
   cycleDrawer() {
@@ -231,7 +302,7 @@ export class SearchPage {
       this.drawerClosed.update((closed) => !closed);
       return;
     }
-    this.sheetHeight.set(phoneTap(this.sheetHeight(), snapHeights(window.innerHeight)));
+    this.sheetHeight.set(phoneTap(this.sheetHeight(), this.snaps()));
   }
 
   onHandleKey(event: KeyboardEvent) {
@@ -244,7 +315,7 @@ export class SearchPage {
       return;
     }
     const direction = event.key === 'ArrowUp' ? 'up' : 'down';
-    this.sheetHeight.set(phoneKey(this.sheetHeight(), direction, snapHeights(window.innerHeight)));
+    this.sheetHeight.set(phoneKey(this.sheetHeight(), direction, this.snaps()));
   }
 
   dragStart(event: PointerEvent) {
@@ -269,7 +340,7 @@ export class SearchPage {
     this.dragLastY = event.clientY;
     this.dragLastT = event.timeStamp;
     const next = this.dragOriginH + (this.dragOriginY - event.clientY);
-    const snaps = snapHeights(window.innerHeight);
+    const snaps = this.snaps();
     this.sheetHeight.set(Math.min(snaps.full, Math.max(snaps.peek, next)));
   }
 
@@ -278,7 +349,7 @@ export class SearchPage {
       return;
     }
     this.dragging.set(false);
-    this.sheetHeight.set(nextSnap(this.sheetHeight(), this.dragVelocity, snapHeights(window.innerHeight)));
+    this.sheetHeight.set(nextSnap(this.sheetHeight(), this.dragVelocity, this.snaps()));
   }
 
   emptyLine(): string {

@@ -208,3 +208,59 @@ test('care needs sit in one scrolling row and the page does not scroll sideways'
   expect(fit!.title).toBeLessThanOrEqual(1);
   expect(fit!.page).toBeLessThanOrEqual(1);
 });
+
+test('the phone bar stays one line and the full sheet clears the chips', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.route('**/api/**', async (route) => {
+    await route.fulfill({ json: { total: 0, page: 1, pageSize: 40, center: null, items: [], groups: [], specialties: [], credentials: [] } });
+  });
+  await page.goto('/');
+  const mast = page.locator('.map-app .mast');
+  const bar = await mast.evaluate((el) => {
+    const crisis = el.querySelector('.crisis') as HTMLElement;
+    return {
+      height: el.getBoundingClientRect().height,
+      overflow: el.scrollHeight - el.clientHeight,
+      crisis: crisis.scrollWidth - crisis.clientWidth,
+    };
+  });
+  expect(bar.height).toBeLessThanOrEqual(52);
+  expect(bar.overflow).toBeLessThanOrEqual(1);
+  expect(bar.crisis).toBeLessThanOrEqual(1);
+  await expect(page.getByRole('link', { name: 'Call 988' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Text 988' })).toBeVisible();
+  await page.getByRole('button', { name: 'Menu' }).click();
+  await expect(page.getByRole('link', { name: 'About the data' })).toBeVisible();
+  await page.keyboard.press('Escape');
+
+  const strip = page.locator('.filter-strip');
+  await expect(strip).toHaveAttribute('data-fade', 'right');
+  expect(await strip.evaluate((el) => getComputedStyle(el).scrollbarWidth)).toBe('none');
+  expect(await strip.evaluate((el) => el.offsetHeight === el.clientHeight)).toBe(true);
+  expect(await page.locator('.drawer-scroll').evaluate((el) => getComputedStyle(el).scrollbarWidth)).toBe('none');
+  await strip.evaluate((el) => {
+    el.scrollLeft = 80;
+    el.dispatchEvent(new Event('scroll'));
+  });
+  await expect(strip).toHaveAttribute('data-fade', 'both');
+  await strip.evaluate((el) => {
+    el.scrollLeft = el.scrollWidth;
+    el.dispatchEvent(new Event('scroll'));
+  });
+  await expect(strip).toHaveAttribute('data-fade', 'left');
+  await page.addStyleTag({ content: '.filter-strip .chip { display: none !important; }' });
+  await page.evaluate(() => window.dispatchEvent(new Event('resize')));
+  await expect(strip).toHaveAttribute('data-fade', 'none');
+
+  const toggle = page.locator('.drawer-toggle');
+  await toggle.focus();
+  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('ArrowUp');
+  await expect.poll(() => page.evaluate(() => {
+    const head = document.querySelector('.drawer-head')!.getBoundingClientRect();
+    const row = document.querySelector('.filter-strip')!.getBoundingClientRect();
+    const zoom = getComputedStyle(document.querySelector('.leaflet-top.leaflet-right')!);
+    const hits = head.right > row.left && head.left < row.right && head.bottom > row.top && head.top < row.bottom;
+    return !hits && head.top >= row.bottom - 1 && zoom.opacity === '0' && zoom.pointerEvents === 'none';
+  })).toBe(true);
+});
