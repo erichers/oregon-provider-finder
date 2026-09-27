@@ -25,6 +25,34 @@ export function plottable(places: MapPlace[]): Array<MapPlace & { lat: number; l
     typeof place.lat === 'number' && typeof place.lng === 'number');
 }
 
+export function nodeHeading(places: Array<{ city: string | null }>): string {
+  const count = places.length;
+  const noun = count === 1 ? 'provider' : 'providers';
+  const counts = new Map<string, { label: string; n: number }>();
+  for (const place of places) {
+    if (!place.city) {
+      continue;
+    }
+    const label = place.city === place.city.toUpperCase()
+      ? place.city.toLowerCase().replace(/\b[a-z]/g, (letter) => letter.toUpperCase())
+      : place.city;
+    const key = label.toLowerCase();
+    const existing = counts.get(key);
+    if (existing) {
+      existing.n += 1;
+    } else {
+      counts.set(key, { label, n: 1 });
+    }
+  }
+  let best: { label: string; n: number } | null = null;
+  for (const entry of counts.values()) {
+    if (!best || entry.n > best.n) {
+      best = entry;
+    }
+  }
+  return best ? `${count} ${noun} near ${best.label}` : `${count} ${noun}`;
+}
+
 export function clusterPlaces(places: MapPlace[]): PlaceGroup[] {
   const groups = new Map<string, PlaceGroup>();
   for (const place of plottable(places)) {

@@ -1,14 +1,15 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, HostListener, afterNextRender, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, convertToParamMap } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { catchError, debounceTime, of, Subject, switchMap } from 'rxjs';
 import { GROUPS, PRESETS, groupLabel } from './catalog';
 import { Facets, FinderApi, LocationHit, MapBounds, ProviderDetail, ProviderSummary, UnderstoodItem } from './finder-api';
-import { chevronDir, nextSnap, sheetExpanded, sheetLabel, snapHeights, toggleLabel } from './drawer-state';
+import { chevronDir, nextSnap, phoneKey, phoneTap, rowFade, sheetExpanded, sheetLabel, snapHeights, toggleLabel } from './drawer-state';
 import { credentialLabel, distanceText, placeCase, phoneText, streetCase } from './format';
 import { ResultMap } from './map-view';
+import { nodeHeading } from './map-state';
 import { SearchQuery, isActive, readQuery, toParams } from './query';
 
 @Component({
@@ -76,6 +77,9 @@ export class SearchPage {
   readonly nearDraft = signal('');
   readonly selectedNpi = signal<string | null>(null);
   readonly picked = signal<ProviderDetail | null>(null);
+  readonly nodeProviders = signal<ProviderSummary[] | null>(null);
+  readonly teaserPerson = signal<ProviderSummary | null>(null);
+  private teaserFrom: 'card' | 'marker' | null = null;
   readonly fitToken = signal(0);
   readonly reveal = signal(0);
   readonly bounds = signal<MapBounds | null>(null);
@@ -85,6 +89,9 @@ export class SearchPage {
   readonly dragging = signal(false);
   readonly listScrolled = signal(false);
   readonly wide = signal(false);
+  readonly stripFade = signal<'none' | 'left' | 'right' | 'both'>('none');
+  readonly zoomQuiet = signal(false);
+  private readonly chromeReserve = signal(132);
   readonly page = signal(1);
   readonly active = computed(() => isActive(this.filters()));
   readonly placeCase = placeCase;
@@ -99,12 +106,57 @@ export class SearchPage {
     this.wide.set(media.matches);
     const onChange = () => this.wide.set(media.matches);
     media.addEventListener('change', onChange);
-    inject(DestroyRef).onDestroy(() => {
+    const destroyRef = inject(DestroyRef);
+    destroyRef.onDestroy(() => {
       media.removeEventListener('change', onChange);
       clearTimeout(this.nearTimer);
     });
 
-    this.sheetHeight.set(snapHeights(window.innerHeight).peek);
+    this.sheetHeight.set(this.snaps().peek);
+    effect(() => {
+      const height = this.sheetHeight();
+      const wide = this.wide();
+      const reserve = this.chromeReserve();
+      if (wide) {
+        this.zoomQuiet.set(false);
+        return;
+      }
+      const snaps = snapHeights(window.innerHeight, reserve);
+      const stripBottom = reserve - 8;
+      const zoomTop = window.innerHeight - height - 28 - 88;
+      this.zoomQuiet.set(height > snaps.half + 8 || zoomTop < stripBottom + 8);
+    });
+    afterNextRender(() => {
+      this.syncChrome();
+      const strip = document.querySelector('.filter-strip');
+      const watched = [strip, document.querySelector('.float-search'), document.querySelector('.mast')].filter((node): node is Element => !!node);
+      const observer = new ResizeObserver(() => this.syncChrome());
+      for (const node of watched) {
+        observer.observe(node);
+      }
+      const watchKids = () => {
+        if (!strip) {
+          return;
+        }
+        for (const child of strip.children) {
+          observer.observe(child);
+        }
+      };
+      watchKids();
+      const mutations = new MutationObserver(() => {
+        watchKids();
+        this.syncChrome();
+      });
+      if (strip) {
+        mutations.observe(strip, { childList: true });
+      }
+      window.addEventListener('resize', this.syncChrome);
+      destroyRef.onDestroy(() => {
+        observer.disconnect();
+        mutations.disconnect();
+        window.removeEventListener('resize', this.syncChrome);
+      });
+    });
 
     this.requests.pipe(
       debounceTime(260),
@@ -158,6 +210,8 @@ export class SearchPage {
         this.nearDraft.set(query.near ?? '');
         this.page.set(1);
         this.flyPending = isActive(query);
+        this.nodeProviders.set(null);
+        this.teaserPerson.set(null);
         this.requests.next({ query, bounds: null, page: 1, reason: 'filter' });
         if (isActive(query)) {
           this.api.facets(query.groups).subscribe((facets) => this.facets.set(facets));
@@ -180,21 +234,101 @@ export class SearchPage {
 
   onBounds(box: MapBounds) {
     this.bounds.set(box);
-    if (this.flyPending) {
+    if (this.flyPending || this.nodeProviders()) {
       return;
     }
     this.requests.next({ query: this.filters(), bounds: box, page: 1, reason: 'bounds' });
   }
 
-  choose(npi: string) {
+  onNode(node: { npis: string[]; teaser: boolean }) {
+    const wanted = new Set(node.npis);
+    const list = this.items().filter((item) => wanted.has(item.npi));
+    if (!list.length) {
+      return;
+    }
+    this.nodeProviders.set(list);
+    this.holdDrawer();
+    if (node.teaser) {
+      this.openTeaser(list[0].npi, 'marker');
+    }
+  }
+
+  listed(): ProviderSummary[] {
+    return this.nodeProviders() ?? this.items();
+  }
+
+  clearNode() {
+    this.nodeProviders.set(null);
+    this.closeTeaser();
+    const box = this.bounds();
+    if (box) {
+      this.requests.next({ query: this.filters(), bounds: box, page: 1, reason: 'bounds' });
+    }
+  }
+
+  openTeaser(npi: string, from: 'card' | 'marker') {
+    const person = (this.nodeProviders() ?? this.items()).find((item) => item.npi === npi);
+    if (!person) {
+      return;
+    }
+    this.teaserPerson.set(person);
+    this.teaserFrom = from;
     this.selectedNpi.set(npi);
     this.reveal.update((n) => n + 1);
-    this.api.detail(npi).subscribe((detail) => {
-      if (this.selectedNpi() === npi) {
-        this.picked.set(detail);
+    this.holdDrawer();
+    queueMicrotask(() => document.getElementById('teaser-close')?.focus());
+  }
+
+  closeTeaser() {
+    if (!this.teaserPerson()) {
+      return;
+    }
+    const from = this.teaserFrom;
+    const npi = this.teaserPerson()?.npi;
+    this.teaserPerson.set(null);
+    this.teaserFrom = null;
+    // Wait for the render that shows the card again on phones, where the teaser stands in for it.
+    setTimeout(() => {
+      if (!npi) {
+        return;
       }
-    });
-    queueMicrotask(() => document.getElementById('result-' + npi)?.scrollIntoView({ block: 'nearest' }));
+      const target = from === 'marker'
+        ? document.querySelector<HTMLElement>('.pin-wrap.selected')
+        : document.querySelector<HTMLElement>('#result-' + npi + ' .result-hit');
+      target?.focus();
+    }, 0);
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape() {
+    this.closeTeaser();
+  }
+
+  @HostListener('document:pointerdown', ['$event'])
+  onOutside(event: PointerEvent) {
+    if (!this.teaserPerson()) {
+      return;
+    }
+    const node = event.target as HTMLElement | null;
+    if (node?.closest('.teaser, .result-hit, .pin-wrap, .cluster-pin')) {
+      return;
+    }
+    this.closeTeaser();
+  }
+
+  private holdDrawer() {
+    this.drawerClosed.set(false);
+    if (this.wide()) {
+      return;
+    }
+    const snaps = this.snaps();
+    if (this.sheetHeight() < snaps.half - 8) {
+      this.sheetHeight.set(snaps.half);
+    }
+  }
+
+  choose(npi: string) {
+    this.openTeaser(npi, 'card');
   }
 
   highlight(npi: string) {
@@ -202,6 +336,10 @@ export class SearchPage {
   }
 
   labelText(): string {
+    const node = this.nodeProviders();
+    if (node) {
+      return nodeHeading(node);
+    }
     return sheetLabel(this.loading(), this.total());
   }
 
@@ -213,12 +351,40 @@ export class SearchPage {
     return chevronDir(this.wide(), this.expanded());
   }
 
+  filtersAria(): string {
+    const count = this.filterChips().length;
+    return count ? `Filters, ${count} active` : 'Filters';
+  }
+
   onListScroll(event: Event) {
     this.listScrolled.set((event.target as HTMLElement).scrollTop > 8);
   }
 
+  onStripScroll(event: Event) {
+    const el = event.target as HTMLElement;
+    this.stripFade.set(rowFade(el.scrollLeft, el.clientWidth, el.scrollWidth));
+  }
+
+  snaps() {
+    return snapHeights(window.innerHeight, this.wide() ? 132 : this.chromeReserve());
+  }
+
+  private readonly syncChrome = () => {
+    const strip = document.querySelector<HTMLElement>('.filter-strip');
+    if (strip) {
+      this.stripFade.set(rowFade(strip.scrollLeft, strip.clientWidth, strip.scrollWidth));
+      if (!this.wide()) {
+        this.chromeReserve.set(Math.ceil(strip.getBoundingClientRect().bottom + 8));
+        const snaps = this.snaps();
+        if (this.sheetHeight() > snaps.full) {
+          this.sheetHeight.set(snaps.full);
+        }
+      }
+    }
+  };
+
   expanded(): boolean {
-    return sheetExpanded(this.wide(), this.drawerClosed(), this.sheetHeight(), snapHeights(window.innerHeight).peek);
+    return sheetExpanded(this.wide(), this.drawerClosed(), this.sheetHeight(), this.snaps().peek);
   }
 
   cycleDrawer() {
@@ -226,17 +392,20 @@ export class SearchPage {
       this.drawerClosed.update((closed) => !closed);
       return;
     }
-    const snaps = snapHeights(window.innerHeight);
-    const order = [snaps.peek, snaps.half, snaps.full];
-    const next = order.find((point) => point > this.sheetHeight() + 24) ?? snaps.peek;
-    this.sheetHeight.set(next);
+    this.sheetHeight.set(phoneTap(this.sheetHeight(), this.snaps()));
   }
 
   onHandleKey(event: KeyboardEvent) {
-    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-      event.preventDefault();
-      this.cycleDrawer();
+    if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') {
+      return;
     }
+    event.preventDefault();
+    if (this.wide()) {
+      this.cycleDrawer();
+      return;
+    }
+    const direction = event.key === 'ArrowUp' ? 'up' : 'down';
+    this.sheetHeight.set(phoneKey(this.sheetHeight(), direction, this.snaps()));
   }
 
   dragStart(event: PointerEvent) {
@@ -261,7 +430,7 @@ export class SearchPage {
     this.dragLastY = event.clientY;
     this.dragLastT = event.timeStamp;
     const next = this.dragOriginH + (this.dragOriginY - event.clientY);
-    const snaps = snapHeights(window.innerHeight);
+    const snaps = this.snaps();
     this.sheetHeight.set(Math.min(snaps.full, Math.max(snaps.peek, next)));
   }
 
@@ -270,7 +439,7 @@ export class SearchPage {
       return;
     }
     this.dragging.set(false);
-    this.sheetHeight.set(nextSnap(this.sheetHeight(), this.dragVelocity, snapHeights(window.innerHeight)));
+    this.sheetHeight.set(nextSnap(this.sheetHeight(), this.dragVelocity, this.snaps()));
   }
 
   emptyLine(): string {

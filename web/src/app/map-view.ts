@@ -11,7 +11,12 @@ type LeafletApi = typeof import('leaflet');
   template: `
     <div class="map-wrap map-stage">
       <div #host class="map-frame" role="region" aria-label="Providers on a map" [attr.data-count]="markerCount()"></div>
-      <button type="button" class="locate" (click)="locate()">Your location</button>
+      <button type="button" class="locate" aria-label="Your location" (click)="locate()">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="3.25" fill="none" stroke="currentColor" stroke-width="1.75" />
+          <path d="M12 3.5v3.2M12 17.3v3.2M3.5 12h3.2M17.3 12h3.2" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+        </svg>
+      </button>
       @if (loading() && markerCount() === 0) {
         <p class="map-status">Loading locations</p>
       } @else if (!loading() && places().length > 0 && markerCount() === 0) {
@@ -34,6 +39,7 @@ export class ResultMap {
   readonly reveal = input(0);
   readonly wide = input(false);
   readonly selectPlace = output<string>();
+  readonly nodeSelect = output<{ npis: string[]; teaser: boolean }>();
   readonly highlightPlace = output<string>();
   readonly boundsChange = output<MapBounds>();
   readonly tilesFailed = signal(false);
@@ -43,6 +49,7 @@ export class ResultMap {
   private readonly host = viewChild<ElementRef<HTMLElement>>('host');
   private map: LeafletMap | null = null;
   private cluster: MarkerClusterGroup | null = null;
+  private readonly byMarker = new Map<unknown, string>();
   private markers = new Map<string, Marker>();
   private leaflet: LeafletApi | null = null;
   private appliedFit = 0;
@@ -119,7 +126,8 @@ export class ResultMap {
       this.cluster = L.markerClusterGroup({
         showCoverageOnHover: false,
         maxClusterRadius: 52,
-        spiderfyOnMaxZoom: true,
+        zoomToBoundsOnClick: false,
+        spiderfyOnMaxZoom: false,
         animate: !reduce,
         animateAddingMarkers: !reduce,
         iconCreateFunction: (cluster) => L.divIcon({
@@ -128,6 +136,14 @@ export class ResultMap {
           iconSize: [44, 44],
           iconAnchor: [22, 22],
         }),
+      });
+      this.cluster.on('clusterclick', (event: unknown) => {
+        const layer = (event as { layer?: { getAllChildMarkers?: () => unknown[] } }).layer;
+        const children = layer?.getAllChildMarkers?.() ?? [];
+        const npis = children.map((marker) => this.byMarker.get(marker)).filter((npi): npi is string => !!npi);
+        if (npis.length) {
+          this.nodeSelect.emit({ npis, teaser: false });
+        }
       });
       this.cluster.addTo(map);
       map.on('moveend', () => {
@@ -146,6 +162,7 @@ export class ResultMap {
     }
     cluster.clearLayers();
     this.markers.clear();
+    this.byMarker.clear();
     for (const place of plottable(places)) {
       const marker = L.marker([place.lat, place.lng], {
         icon: this.pin(L, place.npi === this.selected()),
@@ -153,7 +170,8 @@ export class ResultMap {
         title: placeCase(place.fullName),
       });
       marker.bindPopup(this.popup(place));
-      marker.on('click', () => this.selectPlace.emit(place.npi));
+      this.byMarker.set(marker, place.npi);
+      marker.on('click', () => this.nodeSelect.emit({ npis: [place.npi], teaser: true }));
       marker.on('mouseover', () => this.highlightPlace.emit(place.npi));
       this.markers.set(place.npi, marker);
       cluster.addLayer(marker);

@@ -135,3 +135,19 @@ The search page header and the 988 line share one slim bar over the map, and the
 ## 2026-09-27: The list opens from a chevron
 
 The gray handle pill is gone. A 44px button at the top of the list holds a chevron. On a wide screen it points left to close and right to open, and a closed drawer shrinks to that button. On a phone it points down to close and up to open, and the closed sheet is a 64px bar with the count. Dragging the bar still changes the sheet height. The arrow does not rotate when reduced motion is on. Active filters, Reset, and Filters share one scrolling row so they do not stack over the map.
+
+## 2026-09-27: Phone zoom sits above the list
+
+On a phone the plus and minus buttons move to the lower right, just above the sheet. They fade out once the sheet rises above half, so they never sit on the chips. Pinch zoom stays on. The wide-screen control stays at the upper right. A tap on the phone arrow opens a peek to half height and closes any taller sheet back to the peek. The up and down keys still step one stop at a time. The full stop is the space under the chip row, so the count and the chevron stay in view. The phone title is OR Provider Finder on the same line as Crisis? Call or text 988. Search, About the data, and GitHub sit in a Menu button.
+
+## 2026-09-27: A map node keeps its list
+
+Clicking a cluster lists the providers in that node and does not zoom or spiderfy. Zooming was the move that replaced the list with whatever the new map bounds returned. The list stays through pans, zooms, and the fly to a single marker. Clearing the node, or starting a new search, shows the map results again. Closing the drawer with the arrow does not wipe the list.
+
+## 2026-09-27: The drawer is not a panel
+
+The drawer column and the phone sheet have no fill, border, or shadow. The search pill, each chip, the count row, and each card are their own glass. Cards use 90% white so the type stays readable on street tiles. The empty margin of the drawer ignores clicks, so a drag there reaches the map. The list column keeps pointer events: letting the gaps pass clicks through stopped the wheel, the trackpad, and touch from scrolling the cards. The column stays transparent, so it still does not read as a panel.
+
+## 2026-09-27: Review fixes before merging R1E
+
+On phones the map credit moves up with the sheet so the sheet never covers it, and the zoom buttons sit 28 px above the sheet so the two do not touch. When the sheet is taller than half, both fade out, and the drawer footer carries the OpenStreetMap credit so it is always on screen. On phones the teaser takes the place of its card in the list, so the same provider does not show twice, and focus goes back to the card after the next render. The desktop reopen tab is 44 px wide. The ZIP center note sits on its own glass card so it reads over the map.
